@@ -23,6 +23,15 @@ var line = d3
     return y(d.value);
   });
 
+var LineConvexHull = d3
+  .line()
+  .x(function (d) {
+    return x(d[0]);
+  })
+  .y(function (d) {
+    return y(d[1]);
+  });
+
 var svg = d3
   .select("body")
   .append("svg")
@@ -34,6 +43,7 @@ var svg = d3
 d3.dsv(";", "data/ARE_2.csv").then(function (data) {
   //var allGroup = ["ARE_21", "ARE_22", "ARE_23"];
   var x_val = [];
+  var hull = [];
   var _keys = Object.keys(data[0]);
   _keys.forEach(function (d) {
     if (!isNaN(d)) {
@@ -59,7 +69,7 @@ d3.dsv(";", "data/ARE_2.csv").then(function (data) {
       return d.ARE_23;
     }),
   ]);
-  console.log(x_val);
+  hull = calculateHull(x_val);
   x.domain(
     d3.extent(x_val, function (d) {
       return d.band;
@@ -89,6 +99,16 @@ d3.dsv(";", "data/ARE_2.csv").then(function (data) {
     .datum(x_val)
     .attr("class", "line")
     .attr("d", line);
+
+  var lineHullComplete = svg
+    .append("path")
+    .datum(hull)
+    .attr("class", "line")
+    .style("stroke-dasharray", "3, 3")
+    .style("stroke", "red")
+    .attr("id", "lineConvexHull")
+    .attr("d", LineConvexHull)
+    .style("opacity", getHullOpacity());
 
   var focus = svg.append("g").attr("class", "focus").style("display", "none");
 
@@ -151,10 +171,11 @@ d3.dsv(";", "data/ARE_2.csv").then(function (data) {
     var dataFilter = x_val.map(function (d) {
       return { band: d.band, value: d[selectedGroup] };
     });
-    console.log(dataFilter);
-    console.log(line);
-    console.log("SVG");
-    console.log(svg);
+
+    //Start find upper convex hull
+    hull = calculateHull(dataFilter);
+    //stop convex hull
+
     // Give these new data to update line
     lineComplete
       .datum(dataFilter)
@@ -171,15 +192,25 @@ d3.dsv(";", "data/ARE_2.csv").then(function (data) {
             return y(+d.value);
           })
       );
-    console.log(lineComplete);
 
-    //svg.append("path").datum(x_val).attr("class", "line").attr("d", line);
-    //.datum(dataFilter)
-    //    .transition()
-    //    .duration(1000)
-    //.attr("stroke", function (d) {
-    //  return myColor(selectedGroup);
-    // });
+    lineHullComplete
+      .datum(hull)
+      .transition()
+      .duration(1000)
+      .style("stroke-dasharray", "3, 3")
+      .style("stroke", "red")
+      .style("opacity", getHullOpacity())
+      .attr(
+        "d",
+        d3
+          .line()
+          .x(function (d) {
+            return x(+d[0]);
+          })
+          .y(function (d) {
+            return y(+d[1]);
+          })
+      );
   }
 
   // When the button is changed, run the updateChart function
@@ -189,12 +220,32 @@ d3.dsv(";", "data/ARE_2.csv").then(function (data) {
     // run the updateChart function with this selected option
     update(selectedOption);
   });
+
+  d3.select("#chk_hull").on("change", function () {
+    d3.select("#lineConvexHull")
+      .transition()
+      .duration(100)
+      .style("opacity", getHullOpacity());
+  });
 });
 
-/*document
-  .getElementById("select_sample")
-  .addEventListener("change", function (event) {
-    console.log(event);
-    const new_val = even.target.value;
+function getHullOpacity() {
+  return d3.select("#chk_hull").property("checked") ? 1 : 0;
+}
+
+function calculateHull(data) {
+  var hull = [];
+  const vertices = data.map(function (d) {
+    return [d.band, d.value];
   });
-*/
+
+  hull = d3.polygonHull(vertices);
+  //hull = hull.slice(hull.length/2 -1,hull.length - 1);
+  hull.push(hull[0]);
+  const start_index = hull.findIndex((d) => {
+    return d[0] == 344.3;
+  });
+  hull = hull.slice(start_index, hull.length);
+
+  return hull;
+}
