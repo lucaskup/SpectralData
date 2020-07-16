@@ -8,10 +8,10 @@ var bisectDate = d3.bisector(function (d) {
   }).left,
   formatValue = d3.format(",");
 
-var x = d3.scaleTime().range([0, width]);
+var x = d3.scaleLinear().range([0, width]);
 var y = d3.scaleLinear().range([height, 0]);
 
-var xAxis = d3.axisBottom(x);
+var xAxis = d3.axisBottom(x).ticks(10).tickFormat(d3.format("i"));
 var yAxis = d3.axisLeft(y);
 
 var line = d3
@@ -65,7 +65,7 @@ d3.dsv(";", "data/ARE_2.csv").then(function (data) {
       return d.band;
     })
   );
-  y.domain([0, max_value]);
+  y.domain([min_value, max_value]);
 
   svg
     .append("g")
@@ -82,7 +82,7 @@ d3.dsv(";", "data/ARE_2.csv").then(function (data) {
     .attr("y", 6)
     .attr("dy", ".71em")
     .style("text-anchor", "end")
-    .text("Number of Likes");
+    .text("Wavelength");
 
   var lineComplete = svg
     .append("path")
@@ -108,7 +108,7 @@ d3.dsv(";", "data/ARE_2.csv").then(function (data) {
 
   focus
     .append("text")
-    .attr("class", "tooltip-date")
+    .attr("class", "tooltip-band")
     .attr("x", 95)
     .attr("y", -2);
 
@@ -116,7 +116,7 @@ d3.dsv(";", "data/ARE_2.csv").then(function (data) {
 
   focus
     .append("text")
-    .attr("class", "tooltip-likes")
+    .attr("class", "tooltip-value")
     .attr("x", 95)
     .attr("y", 18);
 
@@ -141,8 +141,8 @@ d3.dsv(";", "data/ARE_2.csv").then(function (data) {
       d1 = actual_data[i],
       d = x0 - d0.band > d1.band - x0 ? d1 : d0;
     focus.attr("transform", "translate(" + x(d.band) + "," + y(d.value) + ")");
-    focus.select(".tooltip-date").text(d.band);
-    focus.select(".tooltip-likes").text(formatValue(d.value));
+    focus.select(".tooltip-band").text(d.band);
+    focus.select(".tooltip-value").text(formatValue(d.value));
   }
 
   // A function that update the chart

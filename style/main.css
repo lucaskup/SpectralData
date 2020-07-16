@@ -9,9 +9,6 @@ body {
   shape-rendering: crispEdges;
 }
 
-.x.axis path {
-  display: none;
-}
 
 .line {
   fill: none;
@@ -37,7 +34,7 @@ body {
   stroke: #000;
 }
 
-.tooltip-date,
-.tooltip-likes {
+.tooltip-band,
+.tooltip-value {
   font-weight: bold;
 }
