@@ -10,9 +10,11 @@ var bisectDate = d3.bisector(function (d) {
 
 var x = d3.scaleLinear().range([0, width]);
 var y = d3.scaleLinear().range([height, 0]);
+var y1 = d3.scaleLinear().range([height, 0]);
 
 var xAxis = d3.axisBottom(x).ticks(10).tickFormat(d3.format("i"));
 var yAxis = d3.axisLeft(y);
+var y1Axis = d3.axisRight(y1);
 
 var line = d3
   .line()
@@ -32,6 +34,15 @@ var LineConvexHull = d3
     return y(d[1]);
   });
 
+var LineContinumRemoved = d3
+  .line()
+  .x(function (d) {
+    return x(d[0]);
+  })
+  .y(function (d) {
+    return y1(d[1]);
+  });
+
 var svg = d3
   .select("body")
   .append("svg")
@@ -44,6 +55,8 @@ d3.dsv(";", "data/ARE_2.csv").then(function (data) {
   //var allGroup = ["ARE_21", "ARE_22", "ARE_23"];
   var x_val = [];
   var hull = [];
+  var continum = [];
+
   var _keys = Object.keys(data[0]);
   _keys.forEach(function (d) {
     if (!isNaN(d)) {
@@ -70,12 +83,14 @@ d3.dsv(";", "data/ARE_2.csv").then(function (data) {
     }),
   ]);
   hull = calculateHull(x_val);
+  continum = removeContinum(x_val, hull);
   x.domain(
     d3.extent(x_val, function (d) {
       return d.band;
     })
   );
   y.domain([min_value, max_value]);
+  y1.domain([0, 1]);
 
   svg
     .append("g")
@@ -87,6 +102,17 @@ d3.dsv(";", "data/ARE_2.csv").then(function (data) {
     .append("g")
     .attr("class", "y axis")
     .call(yAxis)
+    .append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 6)
+    .attr("dy", ".71em")
+    .style("text-anchor", "end")
+    .text("Wavelength");
+  svg
+    .append("g")
+    .attr("transform", "translate("+width +",0)")
+    .attr("class", "y axis")
+    .call(y1Axis)
     .append("text")
     .attr("transform", "rotate(-90)")
     .attr("y", 6)
@@ -109,6 +135,14 @@ d3.dsv(";", "data/ARE_2.csv").then(function (data) {
     .attr("id", "lineConvexHull")
     .attr("d", LineConvexHull)
     .style("opacity", getHullOpacity());
+  var lineContinumRemovedComplete = svg
+    .append("path")
+    .datum(continum)
+    .attr("class", "line")
+    .style("stroke", "pink")
+    .attr("id", "lineContinum")
+    .attr("d", LineContinumRemoved)
+    .style("opacity", getContinumOpacity());
 
   var focus = svg.append("g").attr("class", "focus").style("display", "none");
 
@@ -175,7 +209,7 @@ d3.dsv(";", "data/ARE_2.csv").then(function (data) {
     //Start find upper convex hull
     hull = calculateHull(dataFilter);
     //stop convex hull
-
+    continum = removeContinum(dataFilter, hull);
     // Give these new data to update line
     lineComplete
       .datum(dataFilter)
@@ -211,6 +245,24 @@ d3.dsv(";", "data/ARE_2.csv").then(function (data) {
             return y(+d[1]);
           })
       );
+
+      lineContinumRemovedComplete
+      .datum(continum)
+      .transition()
+      .duration(1000)
+      .style("stroke", "pink")
+      .style("opacity", getContinumOpacity())
+      .attr(
+        "d",
+        d3
+          .line()
+          .x(function (d) {
+            return x(+d[0]);
+          })
+          .y(function (d) {
+            return y1(+d[1]);
+          })
+      );
   }
 
   // When the button is changed, run the updateChart function
@@ -227,11 +279,22 @@ d3.dsv(";", "data/ARE_2.csv").then(function (data) {
       .duration(100)
       .style("opacity", getHullOpacity());
   });
+
+  d3.select("#chk_cont").on("change", function () {
+    d3.select("#lineContinum")
+      .transition()
+      .duration(100)
+      .style("opacity", getContinumOpacity());
+  });
 });
 
 function getHullOpacity() {
   return d3.select("#chk_hull").property("checked") ? 1 : 0;
 }
+
+function getContinumOpacity() {
+    return d3.select("#chk_cont").property("checked") ? 1 : 0;
+  }
 
 function calculateHull(data) {
   var hull = [];
@@ -248,4 +311,35 @@ function calculateHull(data) {
   hull = hull.slice(start_index, hull.length);
 
   return hull;
+}
+
+function removeContinum(data, hull) {
+  var continumRemoved = [];
+  var indexHull = 0;
+  //the convex hull points are not as dense as
+  //the radiometer data, but we can find linear
+  //equations that describe each of the segments
+  //of the convex hull
+  //line equation f(x) = ax + b
+  var a = 0;
+  var b = 0;
+  const f = (x) => {
+    return a * x + b;
+  };
+  
+  for (var i = 0; i < data.length; i++) {
+    //find the convexhull index
+    if (data[i].band > hull[indexHull + 1][0]) {
+      indexHull++;
+    }
+    //find the line
+    a =
+      (hull[indexHull + 1][1] - hull[indexHull][1]) /
+      (hull[indexHull + 1][0] - hull[indexHull][0]);
+    b = hull[indexHull][1] - a * hull[indexHull][0];
+
+    const x = data[i].band;
+    continumRemoved.push([x, +(data[i].value / f(x)).toFixed(4)]);
+  }
+  return continumRemoved;
 }
