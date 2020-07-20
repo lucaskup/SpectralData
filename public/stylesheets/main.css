@@ -24,7 +24,9 @@ body {
 .focus circle {
   fill: steelblue;
 }
-
+.axis-text{
+  font-size: 14px;
+}
 .focus text {
   font-size: 14px;
 }
