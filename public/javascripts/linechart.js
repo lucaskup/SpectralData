@@ -51,37 +51,53 @@ var svg = d3
   .append("g")
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-d3.dsv(";", "data/ARE_2.csv").then(function (data) {
+//Espectro_Roncador
+//Espectro_Taubaté
+//Espectro_Torres
+
+d3.dsv(";", "data/Espectro_Medidas_UFRN.csv").then(function (data) {
   //var allGroup = ["ARE_21", "ARE_22", "ARE_23"];
   var x_val = [];
   var hull = [];
   var continum = [];
 
-  var _keys = Object.keys(data[0]);
-  _keys.forEach(function (d) {
-    if (!isNaN(d)) {
-      x_val.push({
-        band: parseFloat(d.replace(",", ".")),
-        value: parseFloat(data[0][d].replace(",", ".")),
-        ARE_21: parseFloat(data[0][d].replace(",", ".")),
-        ARE_22: parseFloat(data[1][d].replace(",", ".")),
-        ARE_23: parseFloat(data[2][d].replace(",", ".")),
+  const min_value = 0;
+  var max_value = min_value;
+  //function to convert the string read in csv file to float
+  const convertBandValue = (x) => {
+    return parseFloat(x.replace(",", "."));
+  };
+
+  //for each of the bands in the csv file
+  const _keys = data.columns;
+  //console.log(data.columns);
+  //first two columns are reserved for sample name and reading point
+  const name_field = data.columns[0];
+  const point_field = data.columns[1];
+
+  _keys.forEach(function (band_column) {
+    const band = convertBandValue(band_column);
+    if (!isNaN(band)) {
+      //creates the default visualization for the first register
+      var row = {
+        band: band,
+        value: convertBandValue(data[0][band_column]),
+      };
+      //for each sample in the file
+      data.forEach(function (sample_line) {
+        const sample = sample_line[name_field] + sample_line[point_field];
+        //console.log(sample);
+        const value = convertBandValue(sample_line[band_column]);
+        row[sample] = value;
+        if (value > max_value) {
+          max_value = value;
+          max_sampleName = sample;
+        }
       });
+      x_val.push(row);
     }
   });
-  const min_value = 0;
-
-  const max_value = d3.max([
-    d3.max(x_val, function (d) {
-      return d.ARE_21;
-    }),
-    d3.max(x_val, function (d) {
-      return d.ARE_22;
-    }),
-    d3.max(x_val, function (d) {
-      return d.ARE_23;
-    }),
-  ]);
+  updateSelectOptions(Object.keys(x_val[0]).slice(2));
   hull = calculateHull(x_val);
   continum = removeContinum(x_val, hull);
   x.domain(
@@ -89,6 +105,7 @@ d3.dsv(";", "data/ARE_2.csv").then(function (data) {
       return d.band;
     })
   );
+
   y.domain([min_value, max_value]);
   y1.domain([0, 1]);
 
@@ -110,7 +127,7 @@ d3.dsv(";", "data/ARE_2.csv").then(function (data) {
     .text("Wavelength");
   svg
     .append("g")
-    .attr("transform", "translate("+width +",0)")
+    .attr("transform", "translate(" + width + ",0)")
     .attr("class", "y axis")
     .call(y1Axis)
     .append("text")
@@ -135,6 +152,7 @@ d3.dsv(";", "data/ARE_2.csv").then(function (data) {
     .attr("id", "lineConvexHull")
     .attr("d", LineConvexHull)
     .style("opacity", getHullOpacity());
+    
   var lineContinumRemovedComplete = svg
     .append("path")
     .datum(continum)
@@ -246,7 +264,7 @@ d3.dsv(";", "data/ARE_2.csv").then(function (data) {
           })
       );
 
-      lineContinumRemovedComplete
+    lineContinumRemovedComplete
       .datum(continum)
       .transition()
       .duration(1000)
@@ -293,20 +311,23 @@ function getHullOpacity() {
 }
 
 function getContinumOpacity() {
-    return d3.select("#chk_cont").property("checked") ? 1 : 0;
-  }
+  return d3.select("#chk_cont").property("checked") ? 1 : 0;
+}
 
 function calculateHull(data) {
   var hull = [];
+  //the function d3.polygonHull expects a list of vertices
+  //(as its supposed to work for polygons)
+  //vertices list is created using a map function
   const vertices = data.map(function (d) {
     return [d.band, d.value];
   });
-
   hull = d3.polygonHull(vertices);
   //hull = hull.slice(hull.length/2 -1,hull.length - 1);
+  //console.log(data);
   hull.push(hull[0]);
   const start_index = hull.findIndex((d) => {
-    return d[0] == 344.3;
+    return d[0] == data[0].band;
   });
   hull = hull.slice(start_index, hull.length);
 
@@ -326,9 +347,16 @@ function removeContinum(data, hull) {
   const f = (x) => {
     return a * x + b;
   };
-  
+
   for (var i = 0; i < data.length; i++) {
-    //find the convexhull index
+    //find the convexhull index, aka bewtween what points
+    //in the convex hull the current value goes
+    // eg: hullindexes [0,100,200]
+    //     valueindexes [0,1,2,...,199,200]
+    //     value index 45 is betwen hull indexes
+    //     [0] = 0 and [1] = 100
+    //console.log(data[i]);
+    //console.log(hull[indexHull + 1]);
     if (data[i].band > hull[indexHull + 1][0]) {
       indexHull++;
     }
@@ -342,4 +370,14 @@ function removeContinum(data, hull) {
     continumRemoved.push([x, +(data[i].value / f(x)).toFixed(4)]);
   }
   return continumRemoved;
+}
+function updateSelectOptions(sampleNames) {
+  d3.select("#select_sample")
+    .selectAll("option")
+    .data(sampleNames)
+    .enter()
+    .append("option")
+    .text(function (d) {
+      return d;
+    });
 }
