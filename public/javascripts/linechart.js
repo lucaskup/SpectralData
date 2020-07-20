@@ -55,7 +55,7 @@ var svg = d3
 //Espectro_Taubaté
 //Espectro_Torres
 
-d3.dsv(";", "data/Espectro_Medidas_UFRN.csv").then(function (data) {
+d3.dsv(";", "data/Espectro_Todos.csv").then(function (data) {
   //var allGroup = ["ARE_21", "ARE_22", "ARE_23"];
   var x_val = [];
   var hull = [];
@@ -152,7 +152,7 @@ d3.dsv(";", "data/Espectro_Medidas_UFRN.csv").then(function (data) {
     .attr("id", "lineConvexHull")
     .attr("d", LineConvexHull)
     .style("opacity", getHullOpacity());
-    
+
   var lineContinumRemovedComplete = svg
     .append("path")
     .datum(continum)
