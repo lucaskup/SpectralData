@@ -100,7 +100,6 @@ d3.dsv(";", "data/Espectro_Todos.csv").then(function (data) {
     })
   );
   const min_value = 0;
-  console.log(x_val);
   const max_value = d3.max(
     x_val.map((d) => {
       return d.value;
