@@ -200,7 +200,9 @@ d3.dsv(";", "data/Espectro_Todos.csv").then(function (data) {
     .attr("width", width)
     .attr("height", height)
     .on("mouseover", function () {
-      focus.style("display", null);
+      if (getValueOpacity()) {
+        focus.style("display", null);
+      }
     })
     .on("mouseout", function () {
       focus.style("display", "none");
@@ -230,11 +232,14 @@ d3.dsv(";", "data/Espectro_Todos.csv").then(function (data) {
     hull = calculateHull(dataFilter);
     //stop convex hull
     continum = removeContinum(dataFilter, hull);
-    
-    
+
     //svg.select(".focus").remove();
     y = d3.scaleLinear().range([height, 0]);
-    const max_domainy = d3.max(dataFilter.map((d)=>{return d.value}))
+    const max_domainy = d3.max(
+      dataFilter.map((d) => {
+        return d.value;
+      })
+    );
     y.domain([0, max_domainy]);
     yAxis = d3.axisLeft(y);
 
