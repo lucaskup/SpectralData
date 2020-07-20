@@ -61,8 +61,6 @@ d3.dsv(";", "data/Espectro_Todos.csv").then(function (data) {
   var hull = [];
   var continum = [];
 
-  const min_value = 0;
-  var max_value = min_value;
   //function to convert the string read in csv file to float
   const convertBandValue = (x) => {
     return parseFloat(x.replace(",", "."));
@@ -89,10 +87,6 @@ d3.dsv(";", "data/Espectro_Todos.csv").then(function (data) {
         //console.log(sample);
         const value = convertBandValue(sample_line[band_column]);
         row[sample] = value;
-        if (value > max_value) {
-          max_value = value;
-          max_sampleName = sample;
-        }
       });
       x_val.push(row);
     }
@@ -103,6 +97,13 @@ d3.dsv(";", "data/Espectro_Todos.csv").then(function (data) {
   x.domain(
     d3.extent(x_val, function (d) {
       return d.band;
+    })
+  );
+  const min_value = 0;
+  console.log(x_val);
+  const max_value = d3.max(
+    x_val.map((d) => {
+      return d.value;
     })
   );
 
@@ -141,7 +142,9 @@ d3.dsv(";", "data/Espectro_Todos.csv").then(function (data) {
     .append("path")
     .datum(x_val)
     .attr("class", "line")
-    .attr("d", line);
+    .attr("d", line)
+    .attr("id", "lineValue")
+    .style("opacity", getValueOpacity());
 
   var lineHullComplete = svg
     .append("path")
@@ -228,11 +231,23 @@ d3.dsv(";", "data/Espectro_Todos.csv").then(function (data) {
     hull = calculateHull(dataFilter);
     //stop convex hull
     continum = removeContinum(dataFilter, hull);
+    
+    
+    //svg.select(".focus").remove();
+    y = d3.scaleLinear().range([height, 0]);
+    const max_domainy = d3.max(dataFilter.map((d)=>{return d.value}))
+    y.domain([0, max_domainy]);
+    yAxis = d3.axisLeft(y);
+
+    svg.select(".y").transition(d3.transition().duration(500)).call(yAxis);
+    //svg.append(focus);
+
     // Give these new data to update line
     lineComplete
       .datum(dataFilter)
       .transition()
       .duration(1000)
+      .style("opacity", getValueOpacity())
       .attr(
         "d",
         d3
@@ -291,6 +306,13 @@ d3.dsv(";", "data/Espectro_Todos.csv").then(function (data) {
     update(selectedOption);
   });
 
+  d3.select("#chk_value").on("change", function () {
+    d3.select("#lineValue")
+      .transition()
+      .duration(100)
+      .style("opacity", getValueOpacity());
+  });
+
   d3.select("#chk_hull").on("change", function () {
     d3.select("#lineConvexHull")
       .transition()
@@ -305,6 +327,10 @@ d3.dsv(";", "data/Espectro_Todos.csv").then(function (data) {
       .style("opacity", getContinumOpacity());
   });
 });
+
+function getValueOpacity() {
+  return d3.select("#chk_value").property("checked") ? 1 : 0;
+}
 
 function getHullOpacity() {
   return d3.select("#chk_hull").property("checked") ? 1 : 0;
