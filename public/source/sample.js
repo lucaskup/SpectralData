@@ -21,12 +21,14 @@ class Sample {
    * Adds a new wavelength to the sample spectra
    * @param {String} band wavelength of the spectra
    * @param {String} value % of reflectance
+   * @returns {ThisType} Fluent API
    */
   addToSpectra(band, value) {
     const convertBandValue = (x) => parseFloat(x.replace(",", "."));
     band = convertBandValue(band);
     value = convertBandValue(value);
     this.spectra.push({ band, value });
+    return this;
   }
   /**
    * Sorts the spectra according to the wavelength
@@ -137,4 +139,25 @@ function removeContinum(data, hull) {
   });
 
   return continumRemoved;
+}
+/**
+ * Creates an array of samples from the csv data
+ * @param {*} data information read from d3 tsv function
+ */
+function createSamples(data) {
+  const samples = [];
+  // first two columns are reserved for sample name and reading point
+  const name_field = data.columns[0];
+  const point_field = data.columns[1];
+  // for each of the bands in the csv file
+  const bandColumns = data.columns.slice(2);
+  data.forEach((row) => {
+    const s = new Sample(row[name_field], row[point_field]);
+
+    bandColumns.forEach((band) => {
+      s.addToSpectra(band, row[band]);
+    });
+    samples.push(s);
+  });
+  return samples;
 }

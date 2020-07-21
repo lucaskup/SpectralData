@@ -3,26 +3,28 @@
   <head>
     <link rel="stylesheet" href="stylesheets/main.css" />
     <script type="text/javascript" src="lib/d3.js"></script>
-    <script type="text/javascript" src="source/sample.js"></script>
-    <script type="text/javascript" src="source/linechart.js" defer></script>
+    <script type="text/javascript" src="source/sample.js" defer></script>
+    <script
+      type="text/javascript"
+      src="source/view_controller.js"
+      defer
+    ></script>
+    <script type="text/javascript" src="source/chart.js" defer></script>
   </head>
   <body>
     <div>
-      <!-- O segundo valor estará selecionado inicialmente -->
-      <select name="select" id="select_sample">
-        <!-- <option value="ARE_21" selected>ARE_2.1</option>-->
-        <!-- <option value="ARE_22">ARE_2.2</option>-->
-        <!-- <option value="ARE_23">ARE_2.3</option>-->
-      </select>
-      <br>
-      <input type="checkbox" id="chk_value" name="value" checked>
+      <select name="select" id="select_sample"> </select>
+      <br />
+      <input type="checkbox" id="chk_value" name="value" checked />
       <label for="chk_value">Reflectance</label>
-      <br>
-      <input type="checkbox" id="chk_hull" name="convex_hul">
+      <br />
+      <input type="checkbox" id="chk_hull" name="convex_hul" />
       <label for="chk_hull">Convex Hull</label>
-      <br>
-      <input type="checkbox" id="chk_cont" name="continum">
+      <br />
+      <input type="checkbox" id="chk_cont" name="continum" />
       <label for="chk_cont">Continum Removed</label>
     </div>
+
+    <main id="main_section"></main>
   </body>
 </html>
