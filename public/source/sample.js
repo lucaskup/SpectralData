@@ -10,6 +10,8 @@ class Sample {
     this.spectra = [];
     this.convexHull = undefined;
     this.continumRemoved = undefined;
+    this.firstDerivative = undefined;
+    this.derivativeOrder = 0;
   }
   /**
    * @returns a unique id: name + "-" + point
@@ -64,6 +66,24 @@ class Sample {
       this.continumRemoved = removeContinum(this.spectra, this.getConvexHull());
     }
     return this.continumRemoved;
+  }
+  /**
+   * This method has lazy processing implemented
+   * @returns numerical extimation of first derivative by the derivative
+   * definition law
+   */
+  getFirstOrderDerivative() {
+    //if (typeof this.firstDerivative === "undefined" ) {
+    if (this.derivativeOrder < 5) {
+      this.firstDerivative = calculateFirstDerivative(this.spectra);
+    } else {
+      this.firstDerivative = smothNoiseRobustDifferentiator(
+        this.derivativeOrder,
+        this.spectra
+      );
+    }
+    //}
+    return this.firstDerivative;
   }
 }
 
@@ -140,6 +160,76 @@ function removeContinum(data, hull) {
 
   return continumRemoved;
 }
+function calculateFirstDerivative(spectra) {
+  const derivative = [];
+
+  for (let i = 0; i < spectra.length - 1; i++) {
+    const fx = spectra[i].value;
+    const fxPlusH = spectra[i + 1].value;
+    const h = spectra[i + 1].band - spectra[i].band;
+
+    const dx = (fxPlusH - fx) / h;
+    derivative.push([spectra[i].band, dx]);
+  }
+  //console.log(derivative);
+  return derivative;
+}
+
+/**
+ *@param {int} N order of approximation Start in 5 odd numbers only
+ * @param {*} spectra that will be used to approximate the derivative
+ * @returns {Array<Number>} the derivative approximated by (f(x + h) -f(x))/h
+ */
+function smothNoiseRobustDifferentiator(N, spectra) {
+  //order of approximation
+
+  let firstDerivative = [];
+  const M = (N - 1) / 2;
+  const m = (N - 3) / 2;
+
+  const nchoosek = (n, k) => {
+    if (k < 0) {
+      return 0;
+    }
+    return binomial(n, k);
+  };
+
+  for (let i = M; i < spectra.length - M; i++) {
+    let somation = 0;
+    const h = (spectra[i + M].band - spectra[i - M].band) / (N - 1);
+    for (let k = 1; k <= M; k++) {
+      //console.log(k);
+      const ck =
+        (1 / Math.pow(2, 2 * m + 1)) *
+        (nchoosek(2 * m, m - k + 1) - nchoosek(2 * m, m - k - 1));
+      //console.log(ck);
+      somation += ck * (spectra[i + k].value - spectra[i - k].value);
+    }
+    const dx = somation / h;
+
+    firstDerivative.push([spectra[i].band, dx]);
+  }
+  return firstDerivative;
+}
+const size = 1000,
+  logf = new Array(size);
+logf[0] = 0;
+for (var i = 1; i <= size; ++i) logf[i] = logf[i - 1] + Math.log(i);
+
+function logf2(n) {
+  return n === 0
+    ? 0
+    : (n + 0.5) * Math.log(n) -
+        n +
+        0.9189385332046728 +
+        0.08333333333333333 / n -
+        0.002777777777777778 * Math.pow(n, -3);
+}
+
+function binomial(n, k) {
+  return Math.exp(logf[n] - logf[n - k] - logf[k]);
+}
+
 /**
  * Creates an array of samples from the csv data
  * @param {*} data information read from d3 tsv function

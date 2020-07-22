@@ -36,6 +36,11 @@ class SpectralChart {
       .line()
       .x((d) => this.x(d[0]))
       .y((d) => this.y1(d[1]));
+
+    this.LineDerivative = d3
+      .line()
+      .x((d) => this.x(d[0]))
+      .y((d) => this.y1(d[1]));
   }
 
   createGraph(samples) {
@@ -64,7 +69,7 @@ class SpectralChart {
     );
 
     this.y.domain([min_value, max_value]);
-    this.y1.domain([0, 1]);
+    this.y1.domain([-1, 1]);
 
     this.svg
       .append("g")
@@ -140,6 +145,15 @@ class SpectralChart {
       .attr("id", "lineContinum")
       .attr("d", this.LineContinumRemoved)
       .style("opacity", getContinumOpacity());
+
+    this.lineDerivativeComplete = this.svg
+      .append("path")
+      .datum(actualSample.getFirstOrderDerivative())
+      .attr("class", "line")
+      .style("stroke", "black")
+      .attr("id", "lineDerivative")
+      .attr("d", this.LineDerivative)
+      .style("opacity", getDerivativeOpacity());
     this.setUpTooltip();
     return this;
   }
@@ -194,6 +208,19 @@ class SpectralChart {
       .duration(1000)
       .style("stroke", "pink")
       .style("opacity", getContinumOpacity())
+      .attr(
+        "d",
+        d3
+          .line()
+          .x((d) => this.x(+d[0]))
+          .y((d) => this.y1(+d[1]))
+      );
+    this.lineDerivativeComplete
+      .datum(sample.getFirstOrderDerivative())
+      .transition()
+      .duration(1000)
+      .style("stroke", "black")
+      .style("opacity", getDerivativeOpacity())
       .attr(
         "d",
         d3

@@ -41,6 +41,14 @@ d3.select("#chk_cont").on("change", () => {
     .style("opacity", getContinumOpacity());
 });
 
+// Plug events on the check controls of the view
+d3.select("#chk_derivative").on("change", () => {
+  d3.select("#lineDerivative")
+    .transition()
+    .duration(100)
+    .style("opacity", getDerivativeOpacity());
+});
+
 // Functions that control opacity of graph lines
 function getValueOpacity() {
   return d3.select("#chk_value").property("checked") ? 1 : 0;
@@ -51,6 +59,9 @@ function getHullOpacity() {
 function getContinumOpacity() {
   return d3.select("#chk_cont").property("checked") ? 1 : 0;
 }
+function getDerivativeOpacity() {
+  return d3.select("#chk_derivative").property("checked") ? 1 : 0;
+}
 
 // When the selected sample button is changed, run the updateChart function
 d3.select("#select_sample").on("change", function (d) {
@@ -58,6 +69,16 @@ d3.select("#select_sample").on("change", function (d) {
   const selectedSampleId = d3.select(this).property("value");
   // run the updateChart function with this selected option
   const sample = samples.find((s) => s.id() == selectedSampleId);
+  chart.updateActiveLine(sample);
+});
+
+// When the selected sample button is changed, run the updateChart function
+d3.select("#select_approx_order").on("change", function (d) {
+  // recover the option that has been chosen
+  const selectedSampleId = d3.select("#select_sample").property("value");
+  // run the updateChart function with this selected option
+  const sample = samples.find((s) => s.id() == selectedSampleId);
+  sample.derivativeOrder = d3.select(this).property("value");
   chart.updateActiveLine(sample);
 });
 
