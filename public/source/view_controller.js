@@ -69,6 +69,7 @@ d3.select("#select_sample").on("change", function (d) {
   const selectedSampleId = d3.select(this).property("value");
   // run the updateChart function with this selected option
   const sample = samples.find((s) => s.id() == selectedSampleId);
+  sample.derivativeOrder = d3.select("#select_approx_order").property("value");
   chart.updateActiveLine(sample);
 });
 
