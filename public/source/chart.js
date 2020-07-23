@@ -4,7 +4,7 @@ class SpectralChart {
     this.viewID = viewID;
 
     this.margin = { top: 30, right: 120, bottom: 30, left: 50 };
-    this.width = 960 - this.margin.left - this.margin.right;
+    this.width = 1060 - this.margin.left - this.margin.right;
     this.height = 550 - this.margin.top - this.margin.bottom;
     this.tooltip = { width: 100, height: 100, x: 10, y: -30 };
 

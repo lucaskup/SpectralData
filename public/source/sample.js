@@ -55,6 +55,7 @@ class Sample {
     if (typeof this.convexHull === "undefined") {
       this.convexHull = calculateHull(this.spectra);
     }
+
     return this.convexHull;
   }
   /**
@@ -74,6 +75,8 @@ class Sample {
    */
   getFirstOrderDerivative() {
     //if (typeof this.firstDerivative === "undefined" ) {
+    //let sp = this.getSmothSpectra();
+    //sp = this.spectra;
     if (this.derivativeOrder < 5) {
       this.firstDerivative = calculateFirstDerivative(this.spectra);
     } else {
@@ -83,10 +86,61 @@ class Sample {
       );
     }
     //}
+
     return this.firstDerivative;
   }
-}
+  /*
+  getSmothSpectra() {
+    //Apply kalman filter
+    var kalmanFilter = new KalmanFilter();
 
+    var dataConstantKalman = this.spectra.map(function (v) {
+      return { band: v.band, value: kalmanFilter.filter(v.value) };
+    });
+    return dataConstantKalman;
+    //console.log(dataConstantKalman);
+  }*/
+}
+//function filterData(spectra){
+
+//return
+//}
+/*
+function fftTransform(spectra) {
+  console.log(spectra.length);
+  let fft = new FFT(512, 512);
+  fft.forward(spectra.map((d) => d.value).slice(0, 512));
+  for (let i = 400; i < 512; i++) {
+    fft.real[fft.reverseTable[i]] = 0;
+    fft.imag[fft.reverseTable[i]] = 0;
+  }
+  const spectrum1 = fft.inverse();
+  //console.log(fft);
+  console.log(fft);
+
+  fft = new FFT(512, 512);
+  fft.forward(spectra.map((d) => d.value).slice(506, 1018));
+  for (let i = 400; i < 512; i++) {
+    fft.real[fft.reverseTable[i]] = 0;
+    fft.imag[fft.reverseTable[i]] = 0;
+  }
+  const spectrum2 = fft.inverse();
+  const fftTrans = [];
+  const spectrum = [];
+  for (let i = 0; i < spectrum1.length; i++) {
+    spectrum.push(spectrum1[i]);
+  }
+  for (let i = 6; i < spectrum2.length; i++) {
+    spectrum.push(spectrum2[i]);
+  }
+  console.log(spectrum);
+  for (let i = 0; i < spectra.length; i++) {
+    const element = spectra[i].band;
+    fftTrans.push([element, spectrum[i]]);
+  }
+  return fftTrans;
+}
+*/
 /**
  * Calculates the upper convex hull of the spectra passed on argument
  * @param {*} data Spectra that will be used to calculate the convex hull
@@ -173,61 +227,6 @@ function calculateFirstDerivative(spectra) {
   }
   //console.log(derivative);
   return derivative;
-}
-
-/**
- *@param {int} N order of approximation Start in 5 odd numbers only
- * @param {*} spectra that will be used to approximate the derivative
- * @returns {Array<Number>} the derivative approximated by (f(x + h) -f(x))/h
- */
-function smothNoiseRobustDifferentiator(N, spectra) {
-  //order of approximation
-
-  let firstDerivative = [];
-  const M = (N - 1) / 2;
-  const m = (N - 3) / 2;
-
-  const nchoosek = (n, k) => {
-    if (k < 0) {
-      return 0;
-    }
-    return binomial(n, k);
-  };
-
-  for (let i = M; i < spectra.length - M; i++) {
-    let somation = 0;
-    const h = (spectra[i + M].band - spectra[i - M].band) / (N - 1);
-    for (let k = 1; k <= M; k++) {
-      //console.log(k);
-      const ck =
-        (1 / Math.pow(2, 2 * m + 1)) *
-        (nchoosek(2 * m, m - k + 1) - nchoosek(2 * m, m - k - 1));
-      //console.log(ck);
-      somation += ck * (spectra[i + k].value - spectra[i - k].value);
-    }
-    const dx = somation / h;
-
-    firstDerivative.push([spectra[i].band, dx]);
-  }
-  return firstDerivative;
-}
-const size = 1000,
-  logf = new Array(size);
-logf[0] = 0;
-for (var i = 1; i <= size; ++i) logf[i] = logf[i - 1] + Math.log(i);
-
-function logf2(n) {
-  return n === 0
-    ? 0
-    : (n + 0.5) * Math.log(n) -
-        n +
-        0.9189385332046728 +
-        0.08333333333333333 / n -
-        0.002777777777777778 * Math.pow(n, -3);
-}
-
-function binomial(n, k) {
-  return Math.exp(logf[n] - logf[n - k] - logf[k]);
 }
 
 /**
