@@ -5,7 +5,7 @@ class SpectralChart {
 
     this.margin = { top: 30, right: 120, bottom: 30, left: 50 };
     this.width = 960 - this.margin.left - this.margin.right;
-    this.height = 500 - this.margin.top - this.margin.bottom;
+    this.height = 550 - this.margin.top - this.margin.bottom;
     this.tooltip = { width: 100, height: 100, x: 10, y: -30 };
 
     this.bisectDate = d3.bisector(function (d) {
@@ -61,20 +61,20 @@ class SpectralChart {
         return d.band;
       })
     );
-    const min_value = 0;
+    const min_value = -5;
     const max_value = d3.max(
       actualSample.spectra.map((d) => {
         return d.value;
       })
     );
 
-    this.y.domain([min_value, max_value]);
+    this.y.domain([-max_value, max_value]);
     this.y1.domain([-1, 1]);
 
     this.svg
       .append("g")
       .attr("class", "x axis")
-      .attr("transform", "translate(0," + this.height + ")")
+      .attr("transform", "translate(0," + this.y(0) + ")")
       .call(this.xAxis);
 
     // text label for the x axis
@@ -165,7 +165,7 @@ class SpectralChart {
 
     this.y = d3.scaleLinear().range([this.height, 0]);
     const max_domain_y = d3.max(spectra.map((d) => d.value));
-    this.y.domain([0, max_domain_y]);
+    this.y.domain([-max_domain_y, max_domain_y]);
     this.yAxis = d3.axisLeft(this.y);
 
     this.svg
