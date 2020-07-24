@@ -13,9 +13,10 @@
     <script type="text/javascript" src="source/chart.js" defer></script>
   </head>
   <body>
-    <div>
+    <header>
+      <!--
       <select name="select" id="select_sample"> </select>
-      <br />
+      <br />-->
       <input type="checkbox" id="chk_value" name="value" checked />
       <label for="chk_value">Reflectance</label>
       <br />
@@ -40,8 +41,11 @@
         <option value="51">51th order</option>
         <option value="61">61th order</option>
       </select>
-    </div>
-
-    <main id="main_section"></main>
+    </header>
+    <aside
+      style="float: left; overflow-x: hidden; overflow-y: auto; height: 500px;"
+      id="table_hold"
+    ></aside>
+    <main id="main_section" style="overflow: hidden;"></main>
   </body>
 </html>

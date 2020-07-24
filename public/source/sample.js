@@ -53,9 +53,11 @@ class Sample {
    */
   getConvexHull() {
     if (typeof this.convexHull === "undefined") {
-      this.convexHull = calculateHull(this.spectra);
+      this.convexHull = calculateHull(this.spectra).map((d) => ({
+        band: d[0],
+        value: d[1],
+      }));
     }
-
     return this.convexHull;
   }
   /**
@@ -64,7 +66,10 @@ class Sample {
    */
   getContinumRemovedSpectra() {
     if (typeof this.continumRemoved === "undefined") {
-      this.continumRemoved = removeContinum(this.spectra, this.getConvexHull());
+      this.continumRemoved = removeContinum(
+        this.spectra,
+        this.getConvexHull()
+      ).map((d) => ({ band: d[0], value: d[1] }));
     }
     return this.continumRemoved;
   }
@@ -77,6 +82,7 @@ class Sample {
     //if (typeof this.firstDerivative === "undefined" ) {
     //let sp = this.getSmothSpectra();
     //sp = this.spectra;
+
     if (this.derivativeOrder < 5) {
       this.firstDerivative = calculateFirstDerivative(this.spectra);
     } else {
@@ -85,62 +91,14 @@ class Sample {
         this.spectra
       );
     }
-    //}
+    this.firstDerivative = this.firstDerivative.map((d) => ({
+      band: d[0],
+      value: d[1],
+    }));
 
     return this.firstDerivative;
   }
-  /*
-  getSmothSpectra() {
-    //Apply kalman filter
-    var kalmanFilter = new KalmanFilter();
-
-    var dataConstantKalman = this.spectra.map(function (v) {
-      return { band: v.band, value: kalmanFilter.filter(v.value) };
-    });
-    return dataConstantKalman;
-    //console.log(dataConstantKalman);
-  }*/
 }
-//function filterData(spectra){
-
-//return
-//}
-/*
-function fftTransform(spectra) {
-  console.log(spectra.length);
-  let fft = new FFT(512, 512);
-  fft.forward(spectra.map((d) => d.value).slice(0, 512));
-  for (let i = 400; i < 512; i++) {
-    fft.real[fft.reverseTable[i]] = 0;
-    fft.imag[fft.reverseTable[i]] = 0;
-  }
-  const spectrum1 = fft.inverse();
-  //console.log(fft);
-  console.log(fft);
-
-  fft = new FFT(512, 512);
-  fft.forward(spectra.map((d) => d.value).slice(506, 1018));
-  for (let i = 400; i < 512; i++) {
-    fft.real[fft.reverseTable[i]] = 0;
-    fft.imag[fft.reverseTable[i]] = 0;
-  }
-  const spectrum2 = fft.inverse();
-  const fftTrans = [];
-  const spectrum = [];
-  for (let i = 0; i < spectrum1.length; i++) {
-    spectrum.push(spectrum1[i]);
-  }
-  for (let i = 6; i < spectrum2.length; i++) {
-    spectrum.push(spectrum2[i]);
-  }
-  console.log(spectrum);
-  for (let i = 0; i < spectra.length; i++) {
-    const element = spectra[i].band;
-    fftTrans.push([element, spectrum[i]]);
-  }
-  return fftTrans;
-}
-*/
 /**
  * Calculates the upper convex hull of the spectra passed on argument
  * @param {*} data Spectra that will be used to calculate the convex hull
@@ -180,11 +138,12 @@ function removeContinum(data, hull) {
 
   // a = (f(x1) - f(x))/(x1 -x)
   const angularCoeficientA = (idx) =>
-    (hull[idx + 1][1] - hull[idx][1]) / (hull[idx + 1][0] - hull[idx][0]);
+    (hull[idx + 1].value - hull[idx].value) /
+    (hull[idx + 1].band - hull[idx].band);
 
   // b = f(x) - a*x
   const linearCoeficientB = (idx) =>
-    hull[idx][1] - angularCoeficientA(idx) * hull[idx][0];
+    hull[idx].value - angularCoeficientA(idx) * hull[idx].band;
 
   //calculates the curified linear function in terms of hull index
   const hullLinearFunction = (idx) => (x) =>
@@ -203,7 +162,7 @@ function removeContinum(data, hull) {
     value index 45 is betwen hull indexes
     [0] = 0 and [1] = 100
     */
-    if (reflectance.band > hull[indexHull + 1][0]) {
+    if (reflectance.band > hull[indexHull + 1].band) {
       indexHull++;
       f = hullLinearFunction(indexHull);
     }

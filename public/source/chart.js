@@ -2,6 +2,7 @@
 class SpectralChart {
   constructor(viewID) {
     this.viewID = viewID;
+    this.activeSamples = [];
 
     this.margin = { top: 30, right: 120, bottom: 30, left: 50 };
     this.width = 1060 - this.margin.left - this.margin.right;
@@ -21,30 +22,10 @@ class SpectralChart {
     this.xAxis = d3.axisBottom(this.x).ticks(10).tickFormat(d3.format("i"));
     this.yAxis = d3.axisLeft(this.y);
     this.y1Axis = d3.axisRight(this.y1);
-
-    this.line = d3
-      .line()
-      .x((d) => this.x(d.band))
-      .y((d) => this.y(d.value));
-
-    this.LineConvexHull = d3
-      .line()
-      .x((d) => this.x(d[0]))
-      .y((d) => this.y(d[1]));
-
-    this.LineContinumRemoved = d3
-      .line()
-      .x((d) => this.x(d[0]))
-      .y((d) => this.y1(d[1]));
-
-    this.LineDerivative = d3
-      .line()
-      .x((d) => this.x(d[0]))
-      .y((d) => this.y1(d[1]));
   }
 
-  createGraph(samples) {
-    const actualSample = samples[0];
+  createGraph(actualSample) {
+    //const actualSample = this.activeSamples[0];
     this.svg = d3
       .select(this.viewID)
       .append("svg")
@@ -119,52 +100,18 @@ class SpectralChart {
       .style("text-anchor", "middle")
       .text("Normalized Reflectance");
 
-    this.lineComplete = this.svg
-      .append("path")
-      .datum(actualSample.spectra)
-      .attr("class", "line")
-      .attr("d", this.line)
-      .attr("id", "lineValue")
-      .style("opacity", getValueOpacity());
+    this.createPathsDynamically();
 
-    this.lineHullComplete = this.svg
-      .append("path")
-      .datum(actualSample.getConvexHull())
-      .attr("class", "line")
-      .style("stroke-dasharray", "3, 3")
-      .style("stroke", "red")
-      .attr("id", "lineConvexHull")
-      .attr("d", this.LineConvexHull)
-      .style("opacity", getHullOpacity());
-
-    this.lineContinumRemovedComplete = this.svg
-      .append("path")
-      .datum(actualSample.getContinumRemovedSpectra())
-      .attr("class", "line")
-      .style("stroke", "pink")
-      .attr("id", "lineContinum")
-      .attr("d", this.LineContinumRemoved)
-      .style("opacity", getContinumOpacity());
-
-    this.lineDerivativeComplete = this.svg
-      .append("path")
-      .datum(actualSample.getFirstOrderDerivative())
-      .attr("class", "line")
-      .style("stroke", "black")
-      .attr("id", "lineDerivative")
-      .attr("d", this.LineDerivative)
-      .style("opacity", getDerivativeOpacity());
-    this.setUpTooltip();
+    //this.setUpTooltip();
     return this;
   }
-  // A function that update the chart
-  updateActiveLine(sample) {
-    // Create new data with the selection?
 
-    const spectra = sample.spectra;
-
+  adjustDomains() {
+    //const max_domain_y = d3.max(spectra.map((d) => d.value));
+    const max_domain_y = d3.max(
+      this.activeSamples.map((d) => d3.max(d.spectra.map((d) => d.value)))
+    );
     this.y = d3.scaleLinear().range([this.height, 0]);
-    const max_domain_y = d3.max(spectra.map((d) => d.value));
     this.y.domain([-max_domain_y, max_domain_y]);
     this.yAxis = d3.axisLeft(this.y);
 
@@ -172,62 +119,24 @@ class SpectralChart {
       .select(".y")
       .transition(d3.transition().duration(500))
       .call(this.yAxis);
-
-    // Give these new data to update line
-    this.lineComplete
-      .datum(spectra)
-      .transition()
-      .duration(1000)
-      .style("opacity", getValueOpacity())
-      .attr(
-        "d",
-        d3
-          .line()
-          .x((d) => this.x(+d.band))
-          .y((d) => this.y(+d.value))
-      );
-
-    this.lineHullComplete
-      .datum(sample.getConvexHull())
-      .transition()
-      .duration(1000)
-      .style("stroke-dasharray", "3, 3")
-      .style("stroke", "red")
-      .style("opacity", getHullOpacity())
-      .attr(
-        "d",
-        d3
-          .line()
-          .x((d) => this.x(+d[0]))
-          .y((d) => this.y(+d[1]))
-      );
-
-    this.lineContinumRemovedComplete
-      .datum(sample.getContinumRemovedSpectra())
-      .transition()
-      .duration(1000)
-      .style("stroke", "pink")
-      .style("opacity", getContinumOpacity())
-      .attr(
-        "d",
-        d3
-          .line()
-          .x((d) => this.x(+d[0]))
-          .y((d) => this.y1(+d[1]))
-      );
-    this.lineDerivativeComplete
-      .datum(sample.getFirstOrderDerivative())
-      .transition()
-      .duration(1000)
-      .style("stroke", "black")
-      .style("opacity", getDerivativeOpacity())
-      .attr(
-        "d",
-        d3
-          .line()
-          .x((d) => this.x(+d[0]))
-          .y((d) => this.y1(+d[1]))
-      );
+    if (this.activeSamples.length >= 1) {
+      d3.selectAll(".line_value")
+        .transition()
+        .duration(500)
+        .attr("d", this.createLineForPathY());
+      d3.selectAll(".line_convex_hull")
+        .transition()
+        .duration(500)
+        .attr("d", this.createLineForPathY());
+      d3.selectAll(".line_continum")
+        .transition()
+        .duration(500)
+        .attr("d", this.createLineForPathY1());
+      d3.selectAll(".line_derivative")
+        .transition()
+        .duration(500)
+        .attr("d", this.createLineForPathY1());
+    }
   }
   setUpTooltip() {
     this.focus = this.svg
@@ -294,5 +203,94 @@ class SpectralChart {
       that.focus.select(".tooltip-band").text(d.band);
       that.focus.select(".tooltip-value").text(that.formatValue(d.value));
     }
+  }
+  addActiveSample(sample) {
+    this.activeSamples.push(sample);
+    this.createSingleGraphPath(sample);
+    this.adjustDomains();
+  }
+  updateDerivative(derivativeOrder) {
+    this.activeSamples.forEach((sample) => {
+      sample.derivativeOrder = derivativeOrder;
+      d3.selectAll("#line_derivative" + sample.id()).remove();
+      this.createSingleGraphPathDerivative(sample);
+    });
+  }
+  removeActiveSample(sampleID) {
+    this.activeSamples = this.activeSamples.filter((s) => s.id() != sampleID);
+    d3.selectAll("#line_value" + sampleID).remove();
+    d3.selectAll("#line_convex_hull" + sampleID).remove();
+    d3.selectAll("#line_continum" + sampleID).remove();
+    d3.selectAll("#line_derivative" + sampleID).remove();
+    this.adjustDomains();
+  }
+  createLineForPathY() {
+    return d3
+      .line()
+      .x((d) => this.x(d.band))
+      .y((d) => this.y(d.value));
+  }
+  createLineForPathY1() {
+    return d3
+      .line()
+      .x((d) => this.x(d.band))
+      .y((d) => this.y1(d.value));
+  }
+  createSingleGraphPathDerivative(sample) {
+    const derivative = this.createLineForPathY1();
+
+    this.svg
+      .append("path")
+      .datum(sample.getFirstOrderDerivative())
+      .attr("class", "line line_derivative")
+      .style("stroke", "black")
+      .attr("id", "line_derivative" + sample.id())
+      .attr("d", derivative)
+      .style("opacity", getDerivativeOpacity());
+  }
+  createSingleGraphPath(sample) {
+    const value = this.createLineForPathY();
+
+    const convexHull = this.createLineForPathY();
+
+    const continumRemoved = this.createLineForPathY1();
+
+    this.svg
+      .append("path")
+      .datum(sample.spectra)
+      .attr("class", "line line_value")
+      .attr("d", value)
+      .attr("id", "line_value" + sample.id())
+      .style("opacity", getValueOpacity());
+
+    this.svg
+      .append("path")
+      .datum(sample.getConvexHull())
+      .attr("class", "line line_convex_hull")
+      .style("stroke-dasharray", "3, 3")
+      .style("stroke", "red")
+      .attr("id", "line_convex_hull" + sample.id())
+      .attr("d", convexHull)
+      .style("opacity", getHullOpacity());
+
+    this.svg
+      .append("path")
+      .datum(sample.getContinumRemovedSpectra())
+      .attr("class", "line line_continum")
+      .style("stroke", "pink")
+      .attr("id", "line_continum" + sample.id())
+      .attr("d", continumRemoved)
+      .style("opacity", getContinumOpacity());
+    this.createSingleGraphPathDerivative(sample);
+  }
+  refreshAllPaths() {
+    d3.selectAll("path").remove();
+    this.adjustDomains();
+    this.createPathsDynamically();
+  }
+  createPathsDynamically() {
+    this.activeSamples.forEach((sample) => {
+      this.createSingleGraphPath(sample);
+    });
   }
 }
