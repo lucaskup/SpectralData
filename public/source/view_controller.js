@@ -44,10 +44,8 @@ d3.select("#chk_cont").on("change", () => {
 
 // Plug events on the check controls of the view
 d3.select("#chk_derivative").on("change", () => {
-  d3.selectAll(".line_derivative")
-    .transition()
-    .duration(100)
-    .style("opacity", getDerivativeOpacity());
+  d3.selectAll(".line_derivative").style("opacity", getDerivativeOpacity());
+  chart.adjustDomains();
 });
 
 // Functions that control opacity of graph lines

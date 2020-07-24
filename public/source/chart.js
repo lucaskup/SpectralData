@@ -42,15 +42,17 @@ class SpectralChart {
         return d.band;
       })
     );
-    const min_value = -5;
     const max_value = d3.max(
       actualSample.spectra.map((d) => {
         return d.value;
       })
     );
 
-    this.y.domain([-max_value, max_value]);
-    this.y1.domain([-1, 1]);
+    const showNegativeValues = getDerivativeOpacity();
+    const min_value = showNegativeValues ? -max_value : 0;
+    const min_valuey1 = showNegativeValues ? -1 : 0;
+    this.y.domain([min_value, max_value]);
+    this.y1.domain([min_valuey1, 1]);
 
     this.svg
       .append("g")
@@ -73,7 +75,7 @@ class SpectralChart {
       .style("text-anchor", "middle")
       .text("Wavelength [nm]");
 
-    this.svg.append("g").attr("class", "y axis").call(this.yAxis);
+    this.svg.append("g").attr("class", "y y0 axis").call(this.yAxis);
 
     this.svg
       .append("text")
@@ -88,7 +90,7 @@ class SpectralChart {
     this.svg
       .append("g")
       .attr("transform", "translate(" + this.width + ",0)")
-      .attr("class", "y axis")
+      .attr("class", "y y1 axis")
       .call(this.y1Axis);
     this.svg
       .append("text")
@@ -108,34 +110,49 @@ class SpectralChart {
 
   adjustDomains() {
     //const max_domain_y = d3.max(spectra.map((d) => d.value));
-    const max_domain_y = d3.max(
-      this.activeSamples.map((d) => d3.max(d.spectra.map((d) => d.value)))
-    );
-    this.y = d3.scaleLinear().range([this.height, 0]);
-    this.y.domain([-max_domain_y, max_domain_y]);
-    this.yAxis = d3.axisLeft(this.y);
-
-    this.svg
-      .select(".y")
-      .transition(d3.transition().duration(500))
-      .call(this.yAxis);
     if (this.activeSamples.length >= 1) {
-      d3.selectAll(".line_value")
-        .transition()
-        .duration(500)
-        .attr("d", this.createLineForPathY());
-      d3.selectAll(".line_convex_hull")
-        .transition()
-        .duration(500)
-        .attr("d", this.createLineForPathY());
-      d3.selectAll(".line_continum")
-        .transition()
-        .duration(500)
-        .attr("d", this.createLineForPathY1());
-      d3.selectAll(".line_derivative")
-        .transition()
-        .duration(500)
-        .attr("d", this.createLineForPathY1());
+      const max_domain_y = d3.max(
+        this.activeSamples.map((d) => d3.max(d.spectra.map((d) => d.value)))
+      );
+      this.y = d3.scaleLinear().range([this.height, 0]);
+
+      this.y1 = d3.scaleLinear().range([this.height, 0]);
+
+      const showNegativeValues = getDerivativeOpacity();
+      const min_value = showNegativeValues ? -max_domain_y : 0;
+      const min_valuey1 = showNegativeValues ? -1 : 0;
+
+      this.y.domain([min_value, max_domain_y]);
+      this.yAxis = d3.axisLeft(this.y);
+
+      this.y1.domain([min_valuey1, 1]);
+      this.y1Axis = d3.axisRight(this.y1);
+      this.svg
+        .select(".y0")
+        .transition(d3.transition().duration(500))
+        .call(this.yAxis);
+      this.svg
+        .select(".y1")
+        .transition(d3.transition().duration(500))
+        .call(this.y1Axis);
+      if (this.activeSamples.length >= 1) {
+        d3.selectAll(".line_value")
+          .transition()
+          .duration(500)
+          .attr("d", this.createLineForPathY());
+        d3.selectAll(".line_convex_hull")
+          .transition()
+          .duration(500)
+          .attr("d", this.createLineForPathY());
+        d3.selectAll(".line_continum")
+          .transition()
+          .duration(500)
+          .attr("d", this.createLineForPathY1());
+        d3.selectAll(".line_derivative")
+          .transition()
+          .duration(500)
+          .attr("d", this.createLineForPathY1());
+      }
     }
   }
   setUpTooltip() {
