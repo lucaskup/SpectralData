@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class
  * Represents a sample point and its spectra
@@ -13,12 +12,14 @@ class Sample {
     this.firstDerivative = undefined;
     this.derivativeOrder = 0;
   }
+
   /**
    * @returns a unique id: name + "-" + point
    */
   id() {
-    return this.name + "-" + this.point;
+    return `${this.name}-${this.point}`;
   }
+
   /**
    * Adds a new wavelength to the sample spectra
    * @param {String} band wavelength of the spectra
@@ -26,12 +27,13 @@ class Sample {
    * @returns {ThisType} Fluent API
    */
   addToSpectra(band, value) {
-    const convertBandValue = (x) => parseFloat(x.replace(",", "."));
-    band = convertBandValue(band);
-    value = convertBandValue(value);
-    this.spectra.push({ band, value });
+    const convertBandValue = x => parseFloat(x.replace(',', '.'));
+    const bandNum = convertBandValue(band);
+    const valueNum = convertBandValue(value);
+    this.spectra.push({ band: bandNum, value: valueNum });
     return this;
   }
+
   /**
    * Sorts the spectra according to the wavelength
    */
@@ -47,42 +49,42 @@ class Sample {
       return 0;
     });
   }
+
   /**
    * This method has lazy processing implemented
    * @returns upper convex of this sample spectra
    */
   getConvexHull() {
-    if (typeof this.convexHull === "undefined") {
-      this.convexHull = calculateHull(this.spectra).map((d) => ({
+    if (typeof this.convexHull === 'undefined') {
+      this.convexHull = calculateHull(this.spectra).map(d => ({
         band: d[0],
         value: d[1],
       }));
     }
     return this.convexHull;
   }
+
   /**
    * This method has lazy processing implemented
    * @returns spectra with continum removed
    */
   getContinumRemovedSpectra() {
-    if (typeof this.continumRemoved === "undefined") {
+    if (typeof this.continumRemoved === 'undefined') {
       this.continumRemoved = removeContinum(
         this.spectra,
         this.getConvexHull()
-      ).map((d) => ({ band: d[0], value: d[1] }));
+      ).map(d => ({ band: d[0], value: d[1] }));
     }
     return this.continumRemoved;
   }
+
   /**
    * This method has lazy processing implemented
-   * @returns numerical extimation of first derivative by the derivative
-   * definition law
+   * @returns numerical extimation of first derivative
+   * decides wheter to use smooth differentiation or
+   * noise suscetible newtons quoefitient
    */
   getFirstOrderDerivative() {
-    //if (typeof this.firstDerivative === "undefined" ) {
-    //let sp = this.getSmothSpectra();
-    //sp = this.spectra;
-
     if (this.derivativeOrder < 5) {
       this.firstDerivative = calculateFirstDerivative(this.spectra);
     } else {
@@ -91,7 +93,7 @@ class Sample {
         this.spectra
       );
     }
-    this.firstDerivative = this.firstDerivative.map((d) => ({
+    this.firstDerivative = this.firstDerivative.map(d => ({
       band: d[0],
       value: d[1],
     }));
@@ -109,13 +111,13 @@ function calculateHull(data) {
   // the function d3.polygonHull expects a list of vertices
   // (as its supposed to work for polygons)
   // vertices list is created using a map function
-  const vertices = data.map((d) => [d.band, d.value]);
+  const vertices = data.map(d => [d.band, d.value]);
 
   hull = d3.polygonHull(vertices);
 
   hull.push(hull[0]);
-  const start_index = hull.findIndex((d) => d[0] == data[0].band);
-  hull = hull.slice(start_index, hull.length);
+  const startIndex = hull.findIndex(d => d[0] === data[0].band);
+  hull = hull.slice(startIndex, hull.length);
   return hull;
 }
 
@@ -137,23 +139,23 @@ function removeContinum(data, hull) {
   */
 
   // a = (f(x1) - f(x))/(x1 -x)
-  const angularCoeficientA = (idx) =>
+  const angularCoeficientA = idx =>
     (hull[idx + 1].value - hull[idx].value) /
     (hull[idx + 1].band - hull[idx].band);
 
   // b = f(x) - a*x
-  const linearCoeficientB = (idx) =>
+  const linearCoeficientB = idx =>
     hull[idx].value - angularCoeficientA(idx) * hull[idx].band;
 
-  //calculates the curified linear function in terms of hull index
-  const hullLinearFunction = (idx) => (x) =>
+  // calculates the curified linear function in terms of hull index
+  const hullLinearFunction = idx => x =>
     angularCoeficientA(idx) * x + linearCoeficientB(idx);
 
-  //finally f is the linear function
+  // finally f is the linear function
   let f = hullLinearFunction(0);
 
-  //for (let i = 0; i < data.length; i++) {
-  data.forEach((reflectance) => {
+  // for (let i = 0; i < data.length; i++) {
+  data.forEach(reflectance => {
     /*
     find the convexhull index, aka bewtween what points
     in the convex hull the current value goes
@@ -173,6 +175,7 @@ function removeContinum(data, hull) {
 
   return continumRemoved;
 }
+
 function calculateFirstDerivative(spectra) {
   const derivative = [];
 
@@ -184,7 +187,6 @@ function calculateFirstDerivative(spectra) {
     const dx = (fxPlusH - fx) / h;
     derivative.push([spectra[i].band, dx]);
   }
-  //console.log(derivative);
   return derivative;
 }
 
@@ -195,14 +197,14 @@ function calculateFirstDerivative(spectra) {
 function createSamples(data) {
   const samples = [];
   // first two columns are reserved for sample name and reading point
-  const name_field = data.columns[0];
-  const point_field = data.columns[1];
+  const nameField = data.columns[0];
+  const pointField = data.columns[1];
   // for each of the bands in the csv file
   const bandColumns = data.columns.slice(2);
-  data.forEach((row) => {
-    const s = new Sample(row[name_field], row[point_field]);
+  data.forEach(row => {
+    const s = new Sample(row[nameField], row[pointField]);
 
-    bandColumns.forEach((band) => {
+    bandColumns.forEach(band => {
       s.addToSpectra(band, row[band]);
     });
     samples.push(s);
