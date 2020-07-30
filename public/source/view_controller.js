@@ -1,21 +1,5 @@
 let chart;
 let samples;
-/**
- * From the avaliable samples, updates the select control
- * on the view (html)
- * @param {Array<Sample>} samples list of samples
- */
-/* function updateSelectOptions(samples) {
-  const sampleNames = samples.map((sample) => sample.id());
-  tabulate(sampleNames, ["#", "Sample ID"]);
-  d3.select("#select_sample")
-    .selectAll("option")
-    .data(sampleNames)
-    .enter()
-    .append("option")
-    .text((d) => d);
-} */
-
 // Plug events on the check controls of the view
 d3.select('#chk_value').on('change', () => {
   d3.selectAll('.line_value')
@@ -60,16 +44,6 @@ function getDerivativeOpacity() {
   return d3.select('#chk_derivative').property('checked') ? 1 : 0;
 }
 
-/* // When the selected sample button is changed, run the updateChart function
-d3.select("#select_sample").on("change", function (d) {
-  // recover the option that has been chosen
-  const selectedSampleId = d3.select(this).property("value");
-  // run the updateChart function with this selected option
-  const sample = samples.find((s) => s.id() == selectedSampleId);
-  sample.derivativeOrder = d3.select("#select_approx_order").property("value");
-  chart.updateActiveLine(sample);
-}); */
-
 // When the derivative order button is changed, run the updateChart function
 d3.select('#select_approx_order').on('change', function(d) {
   // console.log(d3.select("#select_approx_order"));
@@ -84,13 +58,17 @@ d3.select('#select_approx_order').on('change', function(d) {
 // Read csv files and creates the graph
 d3.dsv(';', 'data/Espectro_Todos.csv').then(function(data) {
   samples = createSamples(data);
-  // updateSelectOptions(samples);
   const sampleNames = samples.map(sample => sample.id());
   tabulate(sampleNames, ['Sample ID']);
   chart = new SpectralChart('#main_section');
   chart.createGraph(samples[0]);
 });
 
+/**
+ * Appends to #table_hold a table that holds all the samples
+ * @param {*} data
+ * @param {Array<String>} columns indicate the table collumns
+ */
 function tabulate(data, columns) {
   const table = d3.select('#table_hold').append('table');
   const thead = table.append('thead');
