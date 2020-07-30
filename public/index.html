@@ -3,8 +3,9 @@
   <head>
     <link rel="stylesheet" href="stylesheets/main.css" />
     <script type="text/javascript" src="lib/d3.js"></script>
-    <script type="text/javascript" src="source/smoth-derivative.js"></script>
+    <script type="text/javascript" src="source/smoth_derivative.js"></script>
     <script type="text/javascript" src="source/sample.js" defer></script>
+    <script type="text/javascript" src="source/csv_helper.js" defer></script>
     <script
       type="text/javascript"
       src="source/view_controller.js"
@@ -14,9 +15,6 @@
   </head>
   <body>
     <header>
-      <!--
-      <select name="select" id="select_sample"> </select>
-      <br />-->
       <input type="checkbox" id="chk_value" name="value" checked />
       <label for="chk_value">Reflectance</label>
       <br />
@@ -28,7 +26,6 @@
       <br />
       <input type="checkbox" id="chk_derivative" name="derivative" />
       <label for="chk_derivative">First Order Derivative</label>
-
       <select name="select_order" id="select_approx_order">
         <option value="0">Use Noisy Data</option>
         <option value="5">5th order</option>
@@ -42,10 +39,12 @@
         <option value="61">61th order</option>
       </select>
     </header>
-    <aside
-      style="float: left; overflow-x: hidden; overflow-y: auto; height: 500px;"
-      id="table_hold"
-    ></aside>
-    <main id="main_section" style="overflow: hidden;"></main>
+    <aside class="aside-container">
+      <div class="table-container" id="table_hold"></div>
+      <div>
+        <input type="button" id="btn_download_csv" value="Download CSV" />
+      </div>
+    </aside>
+    <main id="main_section" class="main_section"></main>
   </body>
 </html>

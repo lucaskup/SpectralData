@@ -9,7 +9,6 @@ body {
   shape-rendering: crispEdges;
 }
 
-
 .line {
   fill: none;
   stroke: steelblue;
@@ -24,7 +23,7 @@ body {
 .focus circle {
   fill: steelblue;
 }
-.axis-text{
+.axis-text {
   font-size: 14px;
 }
 .focus text {
@@ -39,4 +38,23 @@ body {
 .tooltip-band,
 .tooltip-value {
   font-weight: bold;
+}
+
+.aside-container {
+  float: left;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  height: 500px;
+  margin: 10px;
+}
+.table-container {
+  float: left;
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 450px;
+  margin: 5px;
+}
+
+.main_section {
+  overflow: hidden;
 }

@@ -189,25 +189,3 @@ function calculateFirstDerivative(spectra) {
   }
   return derivative;
 }
-
-/**
- * Creates an array of samples from the csv data
- * @param {*} data information read from d3 tsv function
- */
-function createSamples(data) {
-  const samples = [];
-  // first two columns are reserved for sample name and reading point
-  const nameField = data.columns[0];
-  const pointField = data.columns[1];
-  // for each of the bands in the csv file
-  const bandColumns = data.columns.slice(2);
-  data.forEach(row => {
-    const s = new Sample(row[nameField], row[pointField]);
-
-    bandColumns.forEach(band => {
-      s.addToSpectra(band, row[band]);
-    });
-    samples.push(s);
-  });
-  return samples;
-}

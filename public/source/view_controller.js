@@ -1,5 +1,28 @@
 let chart;
 let samples;
+
+// Plug events on download csv button
+d3.select('#btn_download_csv').on('click', () => {
+  const { activeSamples } = chart;
+  const csv = createCSV(activeSamples);
+  if (csv) {
+    const csvContent = `data:text/csv;charset=utf-8,${csv}`;
+    const encodedUri = encodeURI(csvContent);
+
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('id', 'id_hidden_download');
+    link.setAttribute('download', 'my_data.csv');
+    document.body.appendChild(link); // Required for FF
+    link.click(); // This will download the data file named "my_data.csv".
+    document.body.removeChild(link); // Required for FF
+  } else {
+    alert(
+      'Apenas dados exibidos no gráfico serão exportados em csv.\nSelecione amostras e dados.'
+    );
+  }
+});
+
 // Plug events on the check controls of the view
 d3.select('#chk_value').on('change', () => {
   d3.selectAll('.line_value')
@@ -30,18 +53,31 @@ d3.select('#chk_derivative').on('change', () => {
   chart.adjustDomains();
 });
 
+function isReflectanceSelected() {
+  return d3.select('#chk_value').property('checked');
+}
+function isConvexHullSelected() {
+  return d3.select('#chk_hull').property('checked');
+}
+function isContinumRemovedSelected() {
+  return d3.select('#chk_cont').property('checked');
+}
+function isDerivativeSelected() {
+  return d3.select('#chk_derivative').property('checked');
+}
+
 // Functions that control opacity of graph lines
 function getValueOpacity() {
-  return d3.select('#chk_value').property('checked') ? 1 : 0;
+  return isReflectanceSelected() ? 1 : 0;
 }
 function getHullOpacity() {
-  return d3.select('#chk_hull').property('checked') ? 1 : 0;
+  return isConvexHullSelected() ? 1 : 0;
 }
 function getContinumOpacity() {
-  return d3.select('#chk_cont').property('checked') ? 1 : 0;
+  return isContinumRemovedSelected() ? 1 : 0;
 }
 function getDerivativeOpacity() {
-  return d3.select('#chk_derivative').property('checked') ? 1 : 0;
+  return isDerivativeSelected() ? 1 : 0;
 }
 
 // When the derivative order button is changed, run the updateChart function
