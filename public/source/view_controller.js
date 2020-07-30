@@ -12,7 +12,7 @@ d3.select('#btn_download_csv').on('click', () => {
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
     link.setAttribute('id', 'id_hidden_download');
-    link.setAttribute('download', 'my_data.csv');
+    link.setAttribute('download', 'spectral_data.csv');
     document.body.appendChild(link); // Required for FF
     link.click(); // This will download the data file named "my_data.csv".
     document.body.removeChild(link); // Required for FF
