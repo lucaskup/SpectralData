@@ -2,7 +2,7 @@
 This repository features a webapp to visualize and process hyperspectral data
 
 <p align="center">
-<img src="https://github.com/lucaskup/VizFracSet/blob/master/sample/all-min.png" width="700" alt="Results"> 
+<img src="https://github.com/lucaskup/SpectralData/blob/master/images/sampleGraph.png" width="750" alt="Results"> 
 </p>
 
 # Table of contents 
