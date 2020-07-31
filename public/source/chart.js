@@ -95,6 +95,7 @@ class SpectralChart {
       .attr('dy', '1em')
       .style('text-anchor', 'middle')
       .text('Normalized Reflectance');
+    this.clipPath = this.svg.append('g').attr('clip-path', 'url(#clip)');
 
     this.createPathsDynamically();
 
@@ -130,24 +131,32 @@ class SpectralChart {
         .transition(d3.transition().duration(500))
         .call(this.y1Axis);
       if (this.activeSamples.length >= 1) {
-        d3.selectAll('.line_value')
-          .transition()
-          .duration(500)
-          .attr('d', this.createLineForPathY());
-        d3.selectAll('.line_convex_hull')
-          .transition()
-          .duration(500)
-          .attr('d', this.createLineForPathY());
-        d3.selectAll('.line_continum')
-          .transition()
-          .duration(500)
-          .attr('d', this.createLineForPathY1());
-        d3.selectAll('.line_derivative')
-          .transition()
-          .duration(500)
-          .attr('d', this.createLineForPathY1());
+        this.recreateAllPAths();
       }
     }
+  }
+
+  /**
+   * Used to recreathe all the paths on the graph
+   * due to a possible change on domains
+   */
+  recreateAllPAths() {
+    d3.selectAll('.line_value')
+      .transition()
+      .duration(500)
+      .attr('d', this.createLineForPathY());
+    d3.selectAll('.line_convex_hull')
+      .transition()
+      .duration(500)
+      .attr('d', this.createLineForPathY());
+    d3.selectAll('.line_continum')
+      .transition()
+      .duration(500)
+      .attr('d', this.createLineForPathY1());
+    d3.selectAll('.line_derivative')
+      .transition()
+      .duration(500)
+      .attr('d', this.createLineForPathY1());
   }
 
   setUpTooltip() {
@@ -266,7 +275,7 @@ class SpectralChart {
   createSingleGraphPathDerivative(sample) {
     const derivative = this.createLineForPathY1();
 
-    this.svg
+    this.clipPath
       .append('path')
       .datum(sample.getFirstOrderDerivative())
       .attr('class', 'line line_derivative')
@@ -283,7 +292,7 @@ class SpectralChart {
 
     const continumRemoved = this.createLineForPathY1();
 
-    this.svg
+    this.clipPath
       .append('path')
       .datum(sample.spectra)
       .attr('class', 'line line_value')
@@ -291,7 +300,7 @@ class SpectralChart {
       .attr('id', `line_value${sample.id()}`)
       .style('opacity', getValueOpacity());
 
-    this.svg
+    this.clipPath
       .append('path')
       .datum(sample.getConvexHull())
       .attr('class', 'line line_convex_hull')
@@ -301,7 +310,7 @@ class SpectralChart {
       .attr('d', convexHull)
       .style('opacity', getHullOpacity());
 
-    this.svg
+    this.clipPath
       .append('path')
       .datum(sample.getContinumRemovedSpectra())
       .attr('class', 'line line_continum')
@@ -310,6 +319,68 @@ class SpectralChart {
       .attr('d', continumRemoved)
       .style('opacity', getContinumOpacity());
     this.createSingleGraphPathDerivative(sample);
+
+    this.setupBrushZoom();
+  }
+
+  setupBrushZoom() {
+    // Add a clipPath: everything out of this area won't be drawn.
+    this.svg
+      .append('defs')
+      .append('svg:clipPath')
+      .attr('id', 'clip')
+      .append('svg:rect')
+      .attr('width', this.width)
+      .attr('height', this.height)
+      .attr('x', 0)
+      .attr('y', 0);
+
+    // Add brushing
+    const brush = d3
+      .brushX() // Add the brush feature using the d3.brush function
+      .extent([[0, 0], [this.width, this.height]]) // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
+      .on('end', () => {
+        // What are the selected boundaries?
+        const extent = d3.event.selection;
+
+        // If no selection, back to initial coordinate. Otherwise, update X axis domain
+        if (!extent) {
+          if (!this.idleTimeout)
+            return (this.idleTimeout = setTimeout(() => {
+              this.idleTimeout = null;
+            }, 350)); // This allows to wait a little bit
+          // x.domain([4, 8]);
+        } else {
+          this.x.domain([this.x.invert(extent[0]), this.x.invert(extent[1])]);
+          this.clipPath.selectAll('.brush').call(brush.move, null); // This remove the grey brush area as soon as the selection has been done
+        }
+
+        // Update axis and line position
+        d3.selectAll('.x')
+          .transition()
+          .duration(500)
+          .call(d3.axisBottom(this.x));
+        this.recreateAllPAths();
+      }); // Each time the brush selection changes, trigger the 'updateChart' function
+    // Add the brushing
+    this.clipPath
+      .append('g')
+      .attr('class', 'brush')
+      .call(brush);
+
+    // If user double click, reinitialize the chart
+    this.svg.on('dblclick', () => {
+      this.x.domain(
+        d3.extent(this.activeSamples[0].spectra, function(d) {
+          return d.band;
+        })
+      );
+      d3.selectAll('.x')
+        .transition()
+        .duration(500)
+        .call(d3.axisBottom(this.x));
+      this.recreateAllPAths();
+    });
   }
 
   refreshAllPaths() {
