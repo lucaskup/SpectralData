@@ -361,7 +361,7 @@ class SpectralChart {
           .duration(500)
           .call(d3.axisBottom(this.x));
         this.recreateAllPAths();
-      }); // Each time the brush selection changes, trigger the 'updateChart' function
+      });
     // Add the brushing
     this.clipPath
       .append('g')
@@ -370,16 +370,18 @@ class SpectralChart {
 
     // If user double click, reinitialize the chart
     this.svg.on('dblclick', () => {
-      this.x.domain(
-        d3.extent(this.activeSamples[0].spectra, function(d) {
-          return d.band;
-        })
-      );
-      d3.selectAll('.x')
-        .transition()
-        .duration(500)
-        .call(d3.axisBottom(this.x));
-      this.recreateAllPAths();
+      if (this.isDisplayingSomething() > 0) {
+        this.x.domain(
+          d3.extent(this.activeSamples[0].spectra, function(d) {
+            return d.band;
+          })
+        );
+        d3.selectAll('.x')
+          .transition()
+          .duration(500)
+          .call(d3.axisBottom(this.x));
+        this.recreateAllPAths();
+      }
     });
   }
 
@@ -393,5 +395,18 @@ class SpectralChart {
     this.activeSamples.forEach(sample => {
       this.createSingleGraphPath(sample);
     });
+  }
+
+  /**
+   * @returns true if there is a sample active and some graph is selected
+   */
+  isDisplayingSomething() {
+    return (
+      this.activeSamples.length > 0 &&
+      (isReflectanceSelected() ||
+        isConvexHullSelected() ||
+        isContinumRemovedSelected() ||
+        isDerivativeSelected())
+    );
   }
 }

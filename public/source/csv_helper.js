@@ -30,13 +30,7 @@ function createCSV(samplesToUse) {
   const exportHull = isConvexHullSelected();
   const exportContinum = isContinumRemovedSelected();
   const exportDerivative = isDerivativeSelected();
-  // if nothing is selected return
-  if (
-    samplesToUse.length === 0 ||
-    (!exportReflectance && !exportHull && !exportContinum && !exportDerivative)
-  ) {
-    return;
-  }
+
   /* It is not trivial to get the columns of the csv file, this
   function is prepared to deal with multi spectral resolutions among the samples
   so it needs to compute the set of all wavelengths among all samples */

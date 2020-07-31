@@ -3,9 +3,9 @@ let samples;
 
 // Plug events on download csv button
 d3.select('#btn_download_csv').on('click', () => {
-  const { activeSamples } = chart;
-  const csv = createCSV(activeSamples);
-  if (csv) {
+  if (chart.isDisplayingSomething()) {
+    const { activeSamples } = chart;
+    const csv = createCSV(activeSamples);
     const csvContent = `data:text/csv;charset=utf-8,${csv}`;
     const encodedUri = encodeURI(csvContent);
 
