@@ -50,7 +50,7 @@ d3.select('#chk_cont').on('change', () => {
 // Plug events on the check controls of the view
 d3.select('#chk_derivative').on('change', () => {
   d3.selectAll('.line_derivative').style('opacity', getDerivativeOpacity());
-  chart.adjustDomains();
+  chart.adjustYDomain();
 });
 
 function isReflectanceSelected() {

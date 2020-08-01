@@ -26,6 +26,14 @@ class SpectralChart {
     this.y1Axis = d3.axisRight(this.y1);
   }
 
+  setupXDomain(oneSample) {
+    this.x.domain(
+      d3.extent(oneSample.spectra, function(d) {
+        return d.band;
+      })
+    );
+  }
+
   createGraph(actualSample) {
     // const actualSample = this.activeSamples[0];
     this.svg = d3
@@ -36,11 +44,7 @@ class SpectralChart {
       .append('g')
       .attr('transform', `translate(${this.margin.left},${this.margin.top})`);
 
-    this.x.domain(
-      d3.extent(actualSample.spectra, function(d) {
-        return d.band;
-      })
-    );
+    this.setupXDomain(actualSample);
     const maxValue = d3.max(actualSample.spectra.map(d => d.value));
 
     const showNegativeValues = getDerivativeOpacity();
@@ -103,7 +107,7 @@ class SpectralChart {
     return this;
   }
 
-  adjustDomains() {
+  adjustYDomain() {
     // const max_domain_y = d3.max(spectra.map((d) => d.value));
     if (this.activeSamples.length >= 1) {
       const maxDomainY = d3.max(
@@ -238,7 +242,7 @@ class SpectralChart {
   addActiveSample(sample) {
     this.activeSamples.push(sample);
     this.createSingleGraphPath(sample);
-    this.adjustDomains();
+    this.adjustYDomain();
   }
 
   updateDerivative(derivativeOrder) {
@@ -255,7 +259,7 @@ class SpectralChart {
     d3.selectAll(`#line_convex_hull${sampleID}`).remove();
     d3.selectAll(`#line_continum${sampleID}`).remove();
     d3.selectAll(`#line_derivative${sampleID}`).remove();
-    this.adjustDomains();
+    this.adjustYDomain();
   }
 
   createLineForPathY() {
@@ -337,21 +341,30 @@ class SpectralChart {
 
     // Add brushing
     const brush = d3
-      .brushX() // Add the brush feature using the d3.brush function
+      .brush() // Add the brush feature using the d3.brush function
       .extent([[0, 0], [this.width, this.height]]) // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
       .on('end', () => {
         // What are the selected boundaries?
-        const extent = d3.event.selection;
+        const { selection } = d3.event;
+        // console.log(vertex2);
 
         // If no selection, back to initial coordinate. Otherwise, update X axis domain
-        if (!extent) {
+        if (!selection) {
           if (!this.idleTimeout)
             return (this.idleTimeout = setTimeout(() => {
               this.idleTimeout = null;
             }, 350)); // This allows to wait a little bit
           // x.domain([4, 8]);
         } else {
-          this.x.domain([this.x.invert(extent[0]), this.x.invert(extent[1])]);
+          const [vertex1, vertex2] = selection;
+          const extentX = [vertex1[0], vertex2[0]];
+          const extentY = [vertex1[1], vertex2[1]];
+          this.x.domain([this.x.invert(extentX[0]), this.x.invert(extentX[1])]);
+          this.y.domain([this.y.invert(extentY[1]), this.y.invert(extentY[0])]);
+          this.y1.domain([
+            this.y1.invert(extentY[1]),
+            this.y1.invert(extentY[0]),
+          ]);
           this.clipPath.selectAll('.brush').call(brush.move, null); // This remove the grey brush area as soon as the selection has been done
         }
 
@@ -360,6 +373,14 @@ class SpectralChart {
           .transition()
           .duration(500)
           .call(d3.axisBottom(this.x));
+        d3.selectAll('.y0')
+          .transition()
+          .duration(500)
+          .call(d3.axisLeft(this.y));
+        d3.selectAll('.y1')
+          .transition()
+          .duration(500)
+          .call(d3.axisLeft(this.y1));
         this.recreateAllPAths();
       });
     // Add the brushing
@@ -370,24 +391,21 @@ class SpectralChart {
 
     // If user double click, reinitialize the chart
     this.svg.on('dblclick', () => {
-      if (this.isDisplayingSomething() > 0) {
-        this.x.domain(
-          d3.extent(this.activeSamples[0].spectra, function(d) {
-            return d.band;
-          })
-        );
+      if (this.activeSamples.length > 0) {
+        this.setupXDomain(this.activeSamples[0]);
         d3.selectAll('.x')
           .transition()
           .duration(500)
           .call(d3.axisBottom(this.x));
-        this.recreateAllPAths();
+
+        this.adjustYDomain();
       }
     });
   }
 
   refreshAllPaths() {
     d3.selectAll('path').remove();
-    this.adjustDomains();
+    this.adjustYDomain();
     this.createPathsDynamically();
   }
 
