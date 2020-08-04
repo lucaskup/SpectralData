@@ -10,7 +10,11 @@ function createSamples(data) {
   // for each of the bands in the csv file
   const bandColumns = data.columns.slice(2);
   data.forEach(row => {
-    const s = new Sample(row[nameField], row[pointField]);
+    const s = new Sample(
+      // dots and commas are a mess to the char.js file, so we replace them
+      row[nameField].replace(',', '.').replace('.', '_'),
+      row[pointField].replace(',', '.').replace('.', '_')
+    );
 
     bandColumns.forEach(band => {
       s.addToSpectra(band, row[band]);

@@ -91,8 +91,14 @@ d3.select('#select_approx_order').on('change', function(d) {
   chart.updateDerivative(derivativeOrder);
 });
 
+// Temporary workaround to see different files
+const urlUsed = window.location.href;
+const fileNameCSVData =
+  urlUsed[urlUsed.length - 1] === 'x'
+    ? 'data/DadosCompleto.csv'
+    : 'data/Espectro_Todos.csv';
 // Read csv files and creates the graph
-d3.dsv(';', 'data/Espectro_Todos.csv').then(function(data) {
+d3.dsv(';', fileNameCSVData).then(function(data) {
   samples = createSamples(data);
   const sampleNames = samples.map(sample => sample.id());
   tabulate(sampleNames, ['Sample ID']);
