@@ -12,8 +12,16 @@ function createSamples(data) {
   data.forEach(row => {
     const s = new Sample(
       // dots and commas are a mess to the char.js file, so we replace them
-      row[nameField].replace(',', '.').replace('.', '_'),
-      row[pointField].replace(',', '.').replace('.', '_')
+      row[nameField]
+        .replace(',', '.')
+        .replace('.', '_')
+        .replace('(', '_')
+        .replace(')', '_'),
+      row[pointField]
+        .replace(',', '.')
+        .replace('.', '_')
+        .replace('(', '_')
+        .replace(')', '_')
     );
 
     bandColumns.forEach(band => {
