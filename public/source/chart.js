@@ -337,8 +337,9 @@ class SpectralChart {
   }
 
   setupBrushZoom() {
+    if (this.defs !== undefined) return;
     // Add a clipPath: everything out of this area won't be drawn.
-    this.svg
+    this.defs = this.svg
       .append('defs')
       .append('svg:clipPath')
       .attr('id', 'clip')
