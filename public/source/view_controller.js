@@ -84,7 +84,6 @@ function getDerivativeOpacity() {
 d3.select('#select_approx_order').on('change', function(d) {
   // console.log(d3.select("#select_approx_order"));
   const derivativeOrder = d3.select(this).property('value');
-
   for (let i = 0; i < samples.length; i++) {
     samples[i].derivativeOrder = derivativeOrder;
   }
@@ -115,12 +114,14 @@ function tabulate(data, columns) {
   const table = d3.select('#table_hold').append('table');
   const thead = table.append('thead');
   const tbody = table.append('tbody');
+  const cols = columns;
+  cols.push('Color');
 
   // append the header row
   thead
     .append('tr')
     .selectAll('th')
-    .data(columns)
+    .data(cols)
     .enter()
     .append('th')
     .text(function(column) {
@@ -144,15 +145,23 @@ function tabulate(data, columns) {
       // values for the columns you provide.
       return columns.map(function(column) {
         // return a new object with a value set to the row's column value.
-        return row;
+        if (column === 'Sample ID') {
+          const idCheck = `chk${row}`;
+          return `<input type="checkbox" class="chk_new_sample" id="${idCheck}" name="continum" /><label for="${idCheck}">${row}</label>`;
+        }
+        const idElement = column.slice(0, 3) + row;
+        return (
+          `<div class="input_color_container">` +
+          `<input type="color" id="${idElement}" class="clrp_sample_color input_color" value="#ffffff"></input>` +
+          `</div>`
+        );
       });
     })
     .enter()
     .append('td')
 
     .html(function(cell) {
-      const idCheck = `chk${cell}`;
-      return `<input type="checkbox" class="chk_new_sample" id="${idCheck}" name="continum" /><label for="${idCheck}">${cell}</label>`;
+      return cell;
     });
   d3.selectAll('.chk_new_sample').on('change', function addNew() {
     const selectedSampleId = this.id.slice(3);
@@ -162,11 +171,45 @@ function tabulate(data, columns) {
         .select('#select_approx_order')
         .property('value');
       chart.addActiveSample(sample);
-      // chart.updateActiveLine(sample);
     } else {
       chart.removeActiveSample(selectedSampleId);
     }
   });
+  d3.selectAll('.clrp_sample_color').on('input', function changeColor() {
+    const selectedSampleId = this.id.slice(3);
+    const {
+      valueLineColor,
+      hullLineColor,
+      continumLineColor,
+      derivativeLineColor,
+    } = getLineColors(selectedSampleId);
+    changeLineColor(`#line_value${selectedSampleId}`, valueLineColor);
+    changeLineColor(`#line_convex_hull${selectedSampleId}`, hullLineColor);
+    changeLineColor(`#line_continum${selectedSampleId}`, continumLineColor);
+    changeLineColor(`#line_derivative${selectedSampleId}`, derivativeLineColor);
+  });
 
   return table;
+}
+function getLineColors(sampleId) {
+  const selectedColor = d3.select(`#Col${sampleId}`).property('value');
+  const isColorSelectedOnFrontEnd = selectedColor === '#ffffff';
+  const valueLineColor = isColorSelectedOnFrontEnd
+    ? 'steelblue'
+    : selectedColor;
+  const hullLineColor = isColorSelectedOnFrontEnd ? 'red' : selectedColor;
+  const continumLineColor = isColorSelectedOnFrontEnd ? 'pink' : selectedColor;
+  const derivativeLineColor = isColorSelectedOnFrontEnd
+    ? 'black'
+    : selectedColor;
+  return {
+    valueLineColor,
+    hullLineColor,
+    continumLineColor,
+    derivativeLineColor,
+  };
+}
+
+function changeLineColor(lineName, lineColor) {
+  d3.selectAll(lineName).style('stroke', lineColor);
 }

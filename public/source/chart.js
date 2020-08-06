@@ -247,9 +247,12 @@ class SpectralChart {
 
   updateDerivative(derivativeOrder) {
     this.activeSamples.forEach(sample => {
+      const derivativeColor = getLineColors(sample.id()).derivativeLineColor;
+
       sample.derivativeOrder = derivativeOrder;
       d3.selectAll(`#line_derivative${sample.id()}`).remove();
-      this.createSingleGraphPathDerivative(sample);
+
+      this.createSingleGraphPathDerivative(sample, derivativeColor);
     });
   }
 
@@ -276,14 +279,14 @@ class SpectralChart {
       .y(d => this.y1(d.value));
   }
 
-  createSingleGraphPathDerivative(sample) {
+  createSingleGraphPathDerivative(sample, derivativeColor) {
     const derivative = this.createLineForPathY1();
 
     this.clipPath
       .append('path')
       .datum(sample.getFirstOrderDerivative())
       .attr('class', 'line line_derivative')
-      .style('stroke', 'black')
+      .style('stroke', derivativeColor)
       .attr('id', `line_derivative${sample.id()}`)
       .attr('d', derivative)
       .style('opacity', getDerivativeOpacity());
@@ -291,15 +294,21 @@ class SpectralChart {
 
   createSingleGraphPath(sample) {
     const value = this.createLineForPathY();
-
     const convexHull = this.createLineForPathY();
-
     const continumRemoved = this.createLineForPathY1();
+
+    const {
+      valueLineColor,
+      hullLineColor,
+      continumLineColor,
+      derivativeLineColor,
+    } = getLineColors(sample.id());
 
     this.clipPath
       .append('path')
       .datum(sample.spectra)
       .attr('class', 'line line_value')
+      .style('stroke', valueLineColor)
       .attr('d', value)
       .attr('id', `line_value${sample.id()}`)
       .style('opacity', getValueOpacity());
@@ -309,7 +318,7 @@ class SpectralChart {
       .datum(sample.getConvexHull())
       .attr('class', 'line line_convex_hull')
       .style('stroke-dasharray', '3, 3')
-      .style('stroke', 'red')
+      .style('stroke', hullLineColor)
       .attr('id', `line_convex_hull${sample.id()}`)
       .attr('d', convexHull)
       .style('opacity', getHullOpacity());
@@ -318,11 +327,11 @@ class SpectralChart {
       .append('path')
       .datum(sample.getContinumRemovedSpectra())
       .attr('class', 'line line_continum')
-      .style('stroke', 'pink')
+      .style('stroke', continumLineColor)
       .attr('id', `line_continum${sample.id()}`)
       .attr('d', continumRemoved)
       .style('opacity', getContinumOpacity());
-    this.createSingleGraphPathDerivative(sample);
+    this.createSingleGraphPathDerivative(sample, derivativeLineColor);
 
     this.setupBrushZoom();
   }

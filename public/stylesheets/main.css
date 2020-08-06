@@ -58,3 +58,21 @@ body {
 .main_section {
   overflow: hidden;
 }
+
+.input_color_container {
+  position: relative;
+  overflow: hidden;
+  width: 25px;
+  height: 25px;
+  border: solid 2px #ddd;
+  border-radius: 25px;
+}
+
+.input_color {
+  position: absolute;
+  right: -8px;
+  top: -8px;
+  width: 56px;
+  height: 56px;
+  border: none;
+}
