@@ -40,10 +40,18 @@
       </select>
     </header>
     <aside class="aside-container">
-      <div class="table-container" id="table_hold"></div>
       <div>
         <input type="button" id="btn_download_csv" value="Download CSV" />
+        <input
+          type="file"
+          id="csv_import"
+          class="input_file_csv"
+          accept=".csv"
+        />
+        <input type="button" id="btn_import_csv_visible" value="Import CSV" />
       </div>
+      <div class="table-container" id="table_hold"></div>
+      <div class="table-container" id="table_hold_import"></div>
     </aside>
     <main id="main_section" class="main_section"></main>
   </body>

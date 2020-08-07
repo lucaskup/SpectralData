@@ -296,7 +296,6 @@ class SpectralChart {
             this.y1.invert(extentY[1]),
             this.y1.invert(extentY[0]),
           ]);
-          console.log(this.width);
           this.clipPath.selectAll('.brush').call(brush.move, null); // This remove the grey brush area as soon as the selection has been done
         }
 

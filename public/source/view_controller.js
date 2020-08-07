@@ -82,7 +82,6 @@ function getDerivativeOpacity() {
 
 // When the derivative order button is changed, run the updateChart function
 d3.select('#select_approx_order').on('change', function(d) {
-  // console.log(d3.select("#select_approx_order"));
   const derivativeOrder = d3.select(this).property('value');
   for (let i = 0; i < samples.length; i++) {
     samples[i].derivativeOrder = derivativeOrder;
@@ -100,7 +99,7 @@ const fileNameCSVData =
 d3.dsv(';', fileNameCSVData).then(function(data) {
   samples = createSamples(data);
   const sampleNames = samples.map(sample => sample.id());
-  tabulate(sampleNames, ['Sample ID']);
+  tabulate(sampleNames, ['Sample ID'], 'table_hold');
   chart = new SpectralChart('#main_section');
   chart.createGraph(samples[0]);
 });
@@ -110,23 +109,33 @@ d3.dsv(';', fileNameCSVData).then(function(data) {
  * @param {*} data
  * @param {Array<String>} columns indicate the table collumns
  */
-function tabulate(data, columns) {
-  const table = d3.select('#table_hold').append('table');
-  const thead = table.append('thead');
-  const tbody = table.append('tbody');
+function tabulate(data, columns, containerID) {
+  const tableObjectId = `${containerID}table`;
+  const tableNotCreated = d3.select(`#${tableObjectId}`).empty();
+  let tbody;
   const cols = columns;
   cols.push('Color');
+  if (tableNotCreated) {
+    const table = d3
+      .select(`#${containerID}`)
+      .append('table')
+      .property('id', tableObjectId);
+    const thead = table.append('thead');
+    tbody = table.append('tbody');
 
-  // append the header row
-  thead
-    .append('tr')
-    .selectAll('th')
-    .data(cols)
-    .enter()
-    .append('th')
-    .text(function(column) {
-      return column;
-    });
+    // append the header row
+    thead
+      .append('tr')
+      .selectAll('th')
+      .data(cols)
+      .enter()
+      .append('th')
+      .text(function(column) {
+        return column;
+      });
+  } else {
+    tbody = d3.select(`#${tableObjectId}`).select('tbody');
+  }
 
   // create a row for each object in the data
   const rows = tbody
@@ -138,7 +147,7 @@ function tabulate(data, columns) {
   // create a cell in each row for each column
   // At this point, the rows have data associated.
   // So the data function accesses it.
-  const cells = rows
+  rows
     .selectAll('td')
     .data(function(row) {
       // he does it this way to guarantee you only use the
@@ -189,8 +198,14 @@ function tabulate(data, columns) {
     changeLineColor(`#line_derivative${selectedSampleId}`, derivativeLineColor);
   });
 
-  return table;
+  return this;
 }
+
+/**
+ * Defines the color of the lines of the graph
+ * @param {Int} sampleId
+ * @returns object with with colors for all lines
+ */
 function getLineColors(sampleId) {
   const selectedColor = d3.select(`#Col${sampleId}`).property('value');
   const isColorSelectedOnFrontEnd = selectedColor === '#ffffff';
@@ -213,3 +228,25 @@ function getLineColors(sampleId) {
 function changeLineColor(lineName, lineColor) {
   d3.selectAll(lineName).style('stroke', lineColor);
 }
+
+d3.select('#csv_import').on('change', function readCSVButton() {
+  if (this.files.length === 1) {
+    const file = this.files[0];
+    const reader = new FileReader();
+    reader.addEventListener('load', event => {
+      const fileUrl = event.target.result;
+      d3.dsv(';', fileUrl).then(function(data) {
+        const newSamples = createSamples(data);
+        newSamples.forEach(s => samples.push(s));
+        const sampleNames = newSamples.map(sample => sample.id());
+        tabulate(sampleNames, ['Sample ID'], 'table_hold_import');
+      });
+    });
+    reader.readAsDataURL(file);
+    this.value = '';
+  }
+});
+
+d3.select('#btn_import_csv_visible').on('click', () => {
+  document.getElementById('csv_import').dispatchEvent(new MouseEvent('click'));
+});

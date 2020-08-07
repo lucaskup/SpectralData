@@ -48,10 +48,9 @@ body {
   margin: 10px;
 }
 .table-container {
-  float: left;
   overflow-x: hidden;
   overflow-y: auto;
-  height: 450px;
+  height: 300px;
   margin: 5px;
 }
 
@@ -75,4 +74,7 @@ body {
   width: 56px;
   height: 56px;
   border: none;
+}
+.input_file_csv {
+  display: none;
 }

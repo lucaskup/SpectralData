@@ -30,7 +30,9 @@ class Sample {
     const convertBandValue = x => parseFloat(x.replace(',', '.'));
     const bandNum = convertBandValue(band);
     const valueNum = convertBandValue(value);
-    this.spectra.push({ band: bandNum, value: valueNum });
+    if (!isNaN(bandNum) && !isNaN(valueNum)) {
+      this.spectra.push({ band: bandNum, value: valueNum });
+    }
     return this;
   }
 
