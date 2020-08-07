@@ -103,7 +103,6 @@ class SpectralChart {
 
     this.createPathsDynamically();
 
-    // this.setUpTooltip();
     return this;
   }
 
@@ -161,82 +160,6 @@ class SpectralChart {
       .transition()
       .duration(500)
       .attr('d', this.createLineForPathY1());
-  }
-
-  setUpTooltip() {
-    this.focus = this.svg
-      .append('g')
-      .attr('class', 'focus')
-      .style('display', 'none');
-
-    this.focus.append('circle').attr('r', 5);
-
-    this.focus
-      .append('rect')
-      .attr('class', 'tooltip')
-      .attr('width', 140)
-      .attr('height', 50)
-      .attr('x', 10)
-      .attr('y', -22)
-      .attr('rx', 4)
-      .attr('ry', 4);
-
-    this.focus
-      .append('text')
-      .attr('x', 18)
-      .attr('y', -2)
-      .text('Wavelength:');
-
-    this.focus
-      .append('text')
-      .attr('class', 'tooltip-band')
-      .attr('x', 95)
-      .attr('y', -2);
-
-    this.focus
-      .append('text')
-      .attr('x', 18)
-      .attr('y', 18)
-      .text('Intensity:');
-
-    this.focus
-      .append('text')
-      .attr('class', 'tooltip-value')
-      .attr('x', 95)
-      .attr('y', 18);
-
-    this.svg
-      .append('rect')
-      .attr('class', 'overlay')
-      .attr('id', 'tooltipRectangle')
-      .attr('width', this.width)
-      .attr('height', this.height)
-      .datum(this)
-      .on('mouseover', () => {
-        if (getValueOpacity()) {
-          this.focus.style('display', null);
-        }
-      })
-      .on('mouseout', () => {
-        this.focus.style('display', 'none');
-      })
-      // eslint-disable-next-line no-use-before-define
-      .on('mousemove', mousemove);
-
-    function mousemove(that) {
-      const actualData = that.lineComplete.datum();
-      const x0 = that.x.invert(d3.mouse(this)[0]);
-      const i = that.bisectDate(actualData, x0, 1);
-      const d0 = actualData[i - 1];
-      const d1 = actualData[i];
-      const d = x0 - d0.band > d1.band - x0 ? d1 : d0;
-      that.focus.attr(
-        'transform',
-        `translate(${that.x(d.band)},${that.y(d.value)})`
-      );
-      that.focus.select('.tooltip-band').text(d.band);
-      that.focus.select('.tooltip-value').text(that.formatValue(d.value));
-    }
   }
 
   addActiveSample(sample) {
@@ -356,15 +279,13 @@ class SpectralChart {
       .on('end', () => {
         // What are the selected boundaries?
         const { selection } = d3.event;
-        // console.log(vertex2);
 
-        // If no selection, back to initial coordinate. Otherwise, update X axis domain
+        // If no selection, back to initial coordinate. Otherwise, update X and Y domain
         if (!selection) {
           if (!this.idleTimeout)
             return (this.idleTimeout = setTimeout(() => {
               this.idleTimeout = null;
             }, 350)); // This allows to wait a little bit
-          // x.domain([4, 8]);
         } else {
           const [vertex1, vertex2] = selection;
           const extentX = [vertex1[0], vertex2[0]];
@@ -375,6 +296,7 @@ class SpectralChart {
             this.y1.invert(extentY[1]),
             this.y1.invert(extentY[0]),
           ]);
+          console.log(this.width);
           this.clipPath.selectAll('.brush').call(brush.move, null); // This remove the grey brush area as soon as the selection has been done
         }
 
@@ -390,7 +312,7 @@ class SpectralChart {
         d3.selectAll('.y1')
           .transition()
           .duration(500)
-          .call(d3.axisLeft(this.y1));
+          .call(d3.axisRight(this.y1));
         this.recreateAllPAths();
       });
     // Add the brushing
