@@ -1,5 +1,5 @@
 body {
-  font: 10px "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background-color: #eeeeee;
 }
 
 .axis path,
@@ -15,47 +15,40 @@ body {
   stroke-width: 1.5px;
 }
 
-.overlay {
-  fill: none;
-  pointer-events: all;
+.col_extra_pad {
+  padding-top: 20px;
+}
+.card_graph_extra_padd {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+.table_xsm,
+.table_xsm td,
+.table_xsm td:first-child,
+.table_xsm td:last-child,
+.table_xsm th,
+.table_xsm th:first-child,
+.table_xsm th:last-child {
+  padding: 0.5rem;
+  vertical-align: middle;
+  /*max-width: 230px;*/
+}
+.table_xsm td:first-child,
+.table_xsm th:first-child {
+  width: 230px;
+  max-width: 230px;
+}
+.table_xsm td:last-child,
+.table_xsm th:last-child {
+  width: 45px;
+  max-width: 45px;
 }
 
-.focus circle {
-  fill: steelblue;
+.custom-control-check {
+  padding-left: 1.5rem;
 }
-.axis-text {
-  font-size: 14px;
-}
-.focus text {
-  font-size: 14px;
-}
-
-.tooltip {
-  fill: white;
-  stroke: #000;
-}
-
-.tooltip-band,
-.tooltip-value {
-  font-weight: bold;
-}
-
-.aside-container {
-  float: left;
-  overflow-x: hidden;
-  overflow-y: hidden;
-  height: 500px;
-  margin: 10px;
-}
-.table-container {
-  overflow-x: hidden;
-  overflow-y: auto;
-  height: 300px;
-  margin: 5px;
-}
-
-.main_section {
-  overflow: hidden;
+.custom-control-check-label {
+  font-size: 0.75rem;
 }
 
 .input_color_container {
@@ -77,4 +70,8 @@ body {
 }
 .input_file_csv {
   display: none;
+}
+
+.card-table {
+  max-height: 85vh;
 }

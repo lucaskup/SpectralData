@@ -3,10 +3,9 @@ class SpectralChart {
     this.viewID = viewID;
     this.activeSamples = [];
 
-    this.margin = { top: 30, right: 120, bottom: 30, left: 50 };
+    this.margin = { top: 20, right: 20, bottom: 20, left: 50 };
     this.width = 1060 - this.margin.left - this.margin.right;
-    this.height = 550 - this.margin.top - this.margin.bottom;
-    this.tooltip = { width: 100, height: 100, x: 10, y: -30 };
+    this.height = 600 - this.margin.top - this.margin.bottom;
 
     this.bisectDate = d3.bisector(function(d) {
       return d.band;
@@ -171,11 +170,11 @@ class SpectralChart {
   updateDerivative(derivativeOrder) {
     this.activeSamples.forEach(sample => {
       const derivativeColor = getLineColors(sample.id()).derivativeLineColor;
-
+      const lineStroke = getLineStrokeWidth();
       sample.derivativeOrder = derivativeOrder;
       d3.selectAll(`#line_derivative${sample.id()}`).remove();
 
-      this.createSingleGraphPathDerivative(sample, derivativeColor);
+      this.createSingleGraphPathDerivative(sample, derivativeColor, lineStroke);
     });
   }
 
@@ -202,7 +201,11 @@ class SpectralChart {
       .y(d => this.y1(d.value));
   }
 
-  createSingleGraphPathDerivative(sample, derivativeColor) {
+  createSingleGraphPathDerivative(
+    sample,
+    derivativeColor,
+    derivativeLineStroke
+  ) {
     const derivative = this.createLineForPathY1();
 
     this.clipPath
@@ -210,6 +213,7 @@ class SpectralChart {
       .datum(sample.getFirstOrderDerivative())
       .attr('class', 'line line_derivative')
       .style('stroke', derivativeColor)
+      .style('stroke-width', derivativeLineStroke)
       .attr('id', `line_derivative${sample.id()}`)
       .attr('d', derivative)
       .style('opacity', getDerivativeOpacity());
@@ -227,11 +231,14 @@ class SpectralChart {
       derivativeLineColor,
     } = getLineColors(sample.id());
 
+    const lineStrokeWidth = getLineStrokeWidth();
+
     this.clipPath
       .append('path')
       .datum(sample.spectra)
       .attr('class', 'line line_value')
       .style('stroke', valueLineColor)
+      .style('stroke-width', lineStrokeWidth)
       .attr('d', value)
       .attr('id', `line_value${sample.id()}`)
       .style('opacity', getValueOpacity());
@@ -242,6 +249,7 @@ class SpectralChart {
       .attr('class', 'line line_convex_hull')
       .style('stroke-dasharray', '3, 3')
       .style('stroke', hullLineColor)
+      .style('stroke-width', lineStrokeWidth)
       .attr('id', `line_convex_hull${sample.id()}`)
       .attr('d', convexHull)
       .style('opacity', getHullOpacity());
@@ -251,10 +259,15 @@ class SpectralChart {
       .datum(sample.getContinumRemovedSpectra())
       .attr('class', 'line line_continum')
       .style('stroke', continumLineColor)
+      .style('stroke-width', lineStrokeWidth)
       .attr('id', `line_continum${sample.id()}`)
       .attr('d', continumRemoved)
       .style('opacity', getContinumOpacity());
-    this.createSingleGraphPathDerivative(sample, derivativeLineColor);
+    this.createSingleGraphPathDerivative(
+      sample,
+      derivativeLineColor,
+      lineStrokeWidth
+    );
 
     this.setupBrushZoom();
   }
