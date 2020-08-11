@@ -110,11 +110,8 @@ d3.dsv(';', fileNameCSVData).then(function(data) {
  * @param {Array<String>} columns indicate the table collumns
  */
 function tabulate(data, columns, containerID) {
-  console.log('tabulate');
-  console.log(data);
   const tableObjectId = `${containerID}table`;
   const tableNotCreated = d3.select(`#${tableObjectId}`).empty();
-  console.log(tableNotCreated);
   let tbody;
   const cols = columns;
   cols.push('Color');
@@ -137,17 +134,14 @@ function tabulate(data, columns, containerID) {
         return column;
       });
   } else {
-    console.log(`#${tableObjectId}`);
     tbody = d3.select(`#${tableObjectId}`).select('tbody');
   }
-  console.log(tbody);
   // create a row for each object in the data
   const rows = tbody
     .selectAll('tr')
     .data(data, d => d)
     .enter()
     .append('tr');
-  console.log(rows);
 
   // create a cell in each row for each column
   // At this point, the rows have data associated.
@@ -157,11 +151,9 @@ function tabulate(data, columns, containerID) {
     .data(function(row) {
       // he does it this way to guarantee you only use the
       // values for the columns you provide.
-      console.log('row');
       return columns.map(function(column) {
         // return a new object with a value set to the row's column value.
         if (column === 'Sample ID') {
-          console.log(row);
           const idCheck = `chk${row}`;
           return getCheckBoxHTML(idCheck, row);
         }
@@ -177,7 +169,6 @@ function tabulate(data, columns, containerID) {
     .append('td')
 
     .html(function(cell) {
-      console.log('html');
       return cell;
     });
   d3.selectAll('.chk_new_sample').on('change', function addNew() {
@@ -239,7 +230,6 @@ function changeLineColor(lineName, lineColor) {
 
 d3.select('#csv_import').on('change', function readCSVButton() {
   if (this.files.length === 1) {
-    console.log('debug');
     const file = this.files[0];
     const reader = new FileReader();
     reader.addEventListener('load', event => {
