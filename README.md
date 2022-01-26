@@ -35,7 +35,26 @@ If you want to run it locally just serve the public folder with a http server of
 
 ## How to cite
 
-Yet to be published.
+If you find our work useful in your research please consider citing our paper:
+
+L. S. Kupssinskü, T. T. Guimarães, C. L. Cazarin, L. Gonzaga and M. R. Veronez, "Vizspectraldata: a WEB-Based Application for Hyperspectral Data Visualization," 2021 IEEE International Geoscience and Remote Sensing Symposium IGARSS, 2021, pp. 5751-5754, doi: 10.1109/IGARSS47720.2021.9553756.
+
+```
+@INPROCEEDINGS{9553756,
+    author={Kupssinskü, Lucas Silveira and 
+            Guimarães, Tainá Thomassim and 
+            Cazarin, Caroline Lessio and 
+            Gonzaga, Luiz and 
+            Veronez, Maurício Roberto},
+    booktitle={2021 IEEE International Geoscience and Remote Sensing Symposium IGARSS}, 
+    title={Vizspectraldata: a WEB-Based Application for Hyperspectral Data Visualization}, 
+    year={2021},
+    volume={},
+    number={},
+    pages={5751-5754},
+    doi={10.1109/IGARSS47720.2021.9553756}
+  }
+```
 
 ## Credits
 This work is credited to the [Vizlab | X-Reality and GeoInformatics Lab](http://www.vizlab.unisinos.br/) and the following authors and developers: [Lucas Silveira Kupssinskü](https://www.researchgate.net/profile/Lucas_Kupssinskue).
