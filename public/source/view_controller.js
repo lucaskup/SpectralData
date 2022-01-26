@@ -2,7 +2,15 @@ let chart;
 let samples;
 
 // Plug events on download csv button
+//data-toggle="modal" data-target="#exampleModalCenter"
 d3.select('#btn_download_csv').on('click', () => {
+  $('#navdrawerDefault').navdrawer('toggle')
+
+  const sampleNames = samples.map(sample => sample.id());
+  tabulate(sampleNames, ['Sample ID'], 'table_download_csv', false, false);
+  $('#exampleModalCenter').modal('toggle')  
+
+  /*
   if (chart.isDisplayingSomething()) {
     const { activeSamples } = chart;
     const csv = createCSV(activeSamples);
@@ -21,6 +29,7 @@ d3.select('#btn_download_csv').on('click', () => {
       'Apenas dados exibidos no gráfico serão exportados em csv.\nSelecione amostras e dados.'
     );
   }
+  */
 });
 
 // Plug events on the check controls of the view
@@ -104,24 +113,16 @@ d3.dsv(';', fileNameCSVData).then(function(data) {
   chart.createGraph(samples[0]);
 });
 
-/**
- * Appends to #table_hold a table that holds all the samples
- * @param {*} data
- * @param {Array<String>} columns indicate the table collumns
- */
-function tabulate(data, columns, containerID) {
-  const tableObjectId = `${containerID}table`;
+
+function asserTableExists(containerID, tableObjectId, cols){
   const tableNotCreated = d3.select(`#${tableObjectId}`).empty();
-  let tbody;
-  const cols = columns;
-  cols.push('Color');
   if (tableNotCreated) {
     const table = d3
       .select(`#${containerID}`)
       .append('table')
       .property('id', tableObjectId);
     const thead = table.append('thead');
-    tbody = table.append('tbody');
+    const tbody = table.append('tbody');
 
     // append the header row
     thead
@@ -133,9 +134,27 @@ function tabulate(data, columns, containerID) {
       .text(function(column) {
         return column;
       });
-  } else {
-    tbody = d3.select(`#${tableObjectId}`).select('tbody');
+    return tbody;
+  } 
+  return d3.select(`#${tableObjectId}`).select('tbody');
+  
+}
+
+/**
+ * Appends to #table_hold a table that holds all the samples
+ * @param {*} data
+ * @param {Array<String>} columns indicate the table collumns
+ */
+function tabulate(data, columns, containerID, useColorColumn=true, addEventListener=true) {
+  const tableObjectId = `${containerID}table`;
+  
+  let tbody;
+  const cols = columns;
+  if (useColorColumn){
+    cols.push('Color');
   }
+  tbody = asserTableExists(containerID, tableObjectId, cols)
+  
   // create a row for each object in the data
   const rows = tbody
     .selectAll('tr')
@@ -154,8 +173,8 @@ function tabulate(data, columns, containerID) {
       return columns.map(function(column) {
         // return a new object with a value set to the row's column value.
         if (column === 'Sample ID') {
-          const idCheck = `chk${row}`;
-          return getCheckBoxHTML(idCheck, row);
+          const idCheck = `${containerID}chk${row}`;
+          return getCheckBoxHTML(idCheck, row, row, addEventListener);
         }
         const idElement = column.slice(0, 3) + row;
         return (
@@ -172,7 +191,8 @@ function tabulate(data, columns, containerID) {
       return cell;
     });
   d3.selectAll('.chk_new_sample').on('change', function addNew() {
-    const selectedSampleId = this.id.slice(3);
+    
+    const selectedSampleId = d3.select(this).attr('data-id');
     if (this.checked) {
       const sample = samples.find(s => s.id() === selectedSampleId);
       sample.derivativeOrder = d3
@@ -258,9 +278,10 @@ d3.select('#inpLineWidth').on('input', () => {
 function getLineStrokeWidth() {
   return d3.select('#inpLineWidth').property('value');
 }
-function getCheckBoxHTML(idCheck, label) {
+function getCheckBoxHTML(idCheck, label, dataID, addEventListener) {
+  const classEventListener = addEventListener ? 'chk_new_sample' : ' '
   return `<div class="custom-control custom-checkbox custom-control-check">
-  <input type="checkbox" class="custom-control-input chk_new_sample" id="${idCheck}">
+  <input type="checkbox" class="custom-control-input ${classEventListener}" id="${idCheck}" data-id="${dataID}">
   <label class="custom-control-label custom-control-check-label" for="${idCheck}">${label}</label>
 </div>`;
 }

@@ -1,222 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8" />
-    <meta
-      content="initial-scale=1, shrink-to-fit=no, width=device-width"
-      name="viewport"
-    />
 
-    <!-- CSS -->
-    <!-- Add Material font (Roboto) and Material icon as needed -->
-    <link
-      href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i|Roboto+Mono:300,400,700|Roboto+Slab:300,400,700"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet"
-    />
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8" />
+  <meta content="initial-scale=1, shrink-to-fit=no, width=device-width" name="viewport" />
 
-    <!-- Add Material CSS, replace Bootstrap CSS -->
-    <link href="stylesheets/material.css" rel="stylesheet" />
+  <!-- CSS -->
+  <!-- Add Material font (Roboto) and Material icon as needed -->
+  <link
+    href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i|Roboto+Mono:300,400,700|Roboto+Slab:300,400,700"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 
-    <link rel="stylesheet" href="stylesheets/main.css" />
-    <script type="text/javascript" src="lib/d3.js"></script>
-    <script type="text/javascript" src="source/smoth_derivative.js"></script>
-    <script type="text/javascript" src="source/sample.js" defer></script>
-    <script type="text/javascript" src="source/csv_helper.js" defer></script>
-    <script
-      type="text/javascript"
-      src="source/view_controller.js"
-      defer
-    ></script>
-    <script type="text/javascript" src="source/chart.js" defer></script>
-  </head>
-  <body>
-    <header
-      class="navbar navbar-dark navbar-full bg-primary doc-navbar-default"
-    >
-      <button
-        aria-controls="navdrawerDefault"
-        aria-expanded="false"
-        aria-label="Toggle Navdrawer"
-        class="navbar-toggler"
-        data-target="#navdrawerDefault"
-        data-toggle="navdrawer"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <span class="navbar-brand mr-auto">Spectral Data</span>
-    </header>
-    <div
-      aria-hidden="true"
-      class="navdrawer"
-      id="navdrawerDefault"
-      tabindex="-1"
-    >
-      <div class="navdrawer-content">
-        <nav class="navdrawer-nav">
-          <p class="navdrawer-subheader">Plot Data</p>
-          <div style="padding-left: 20px; padding-right: 20px;">
-            <div
-              class="custom-control custom-switch"
-              style="margin-bottom:15px;"
-            >
-              <input
-                class="custom-control-input"
-                id="chk_value"
-                type="checkbox"
-                checked
-              />
-              <span class="custom-control-track"></span>
-              <label class="custom-control-label" for="chk_value"
-                >Reflectance</label
-              >
-            </div>
-            <div
-              class="custom-control custom-switch"
-              style="margin-bottom:15px;"
-            >
-              <input
-                class="custom-control-input"
-                id="chk_hull"
-                type="checkbox"
-              />
-              <span class="custom-control-track"></span>
-              <label class="custom-control-label" for="chk_hull"
-                >Convex Hull</label
-              >
-            </div>
-            <div
-              class="custom-control custom-switch"
-              style="margin-bottom:15px;"
-            >
-              <input
-                class="custom-control-input"
-                id="chk_cont"
-                type="checkbox"
-              />
-              <span class="custom-control-track"></span>
-              <label class="custom-control-label" for="chk_cont"
-                >Continum Removed</label
-              >
-            </div>
-            <div
-              class="custom-control custom-switch"
-              style="margin-bottom:15px;"
-            >
-              <input
-                class="custom-control-input"
-                id="chk_derivative"
-                type="checkbox"
-              />
-              <span class="custom-control-track"></span>
-              <label class="custom-control-label" for="chk_derivative"
-                >Derivative</label
-              >
-            </div>
-            <select
-              name="select_order"
-              id="select_approx_order"
-              class="custom-select"
-            >
-              <option value="0">Use Noisy Data</option>
-              <option value="5">5th order</option>
-              <option value="7">7th order</option>
-              <option value="9">9th order</option>
-              <option value="11">11th order</option>
-              <option value="21">21th order</option>
-              <option value="31">31th order</option>
-              <option value="41">41th order</option>
-              <option value="51">51th order</option>
-              <option value="61">61th order</option>
-            </select>
-          </div>
-        </nav>
-        <div class="navdrawer-divider"></div>
-        <p class="navdrawer-subheader">Line Style</p>
+  <!-- Add Material CSS, replace Bootstrap CSS -->
+  <link href="stylesheets/material.css" rel="stylesheet" />
+
+  <link rel="stylesheet" href="stylesheets/main.css" />
+  <script type="text/javascript" src="lib/d3.js"></script>
+  <script type="text/javascript" src="source/smoth_derivative.js"></script>
+  <script type="text/javascript" src="source/sample.js" defer></script>
+  <script type="text/javascript" src="source/csv_helper.js" defer></script>
+  <script type="text/javascript" src="source/view_controller.js" defer></script>
+  <script type="text/javascript" src="source/chart.js" defer></script>
+</head>
+
+<body>
+  <header class="navbar navbar-dark navbar-full bg-primary doc-navbar-default">
+    <button aria-controls="navdrawerDefault" aria-expanded="false" aria-label="Toggle Navdrawer" class="navbar-toggler"
+      data-target="#navdrawerDefault" data-toggle="navdrawer">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <span class="navbar-brand mr-auto">Spectral Data</span>
+  </header>
+  <div aria-hidden="true" class="navdrawer" id="navdrawerDefault" tabindex="-1">
+    <div class="navdrawer-content">
+      <nav class="navdrawer-nav">
+        <p class="navdrawer-subheader">Plot Data</p>
         <div style="padding-left: 20px; padding-right: 20px;">
-          <label for="inpLineWidth">Line Width</label>
-          <input
-            type="range"
-            class="custom-range"
-            min="1.0"
-            max="6"
-            value="1.5"
-            id="inpLineWidth"
-            step="0.5"
-          />
+          <div class="custom-control custom-switch" style="margin-bottom:15px;">
+            <input class="custom-control-input" id="chk_value" type="checkbox" checked />
+            <span class="custom-control-track"></span>
+            <label class="custom-control-label" for="chk_value">Reflectance</label>
+          </div>
+          <div class="custom-control custom-switch" style="margin-bottom:15px;">
+            <input class="custom-control-input" id="chk_hull" type="checkbox" />
+            <span class="custom-control-track"></span>
+            <label class="custom-control-label" for="chk_hull">Convex Hull</label>
+          </div>
+          <div class="custom-control custom-switch" style="margin-bottom:15px;">
+            <input class="custom-control-input" id="chk_cont" type="checkbox" />
+            <span class="custom-control-track"></span>
+            <label class="custom-control-label" for="chk_cont">Continum Removed</label>
+          </div>
+          <div class="custom-control custom-switch" style="margin-bottom:15px;">
+            <input class="custom-control-input" id="chk_derivative" type="checkbox" />
+            <span class="custom-control-track"></span>
+            <label class="custom-control-label" for="chk_derivative">Derivative</label>
+          </div>
+          <select name="select_order" id="select_approx_order" class="custom-select">
+            <option value="0">Use Noisy Data</option>
+            <option value="5">5th order</option>
+            <option value="7">7th order</option>
+            <option value="9">9th order</option>
+            <option value="11">11th order</option>
+            <option value="21">21th order</option>
+            <option value="31">31th order</option>
+            <option value="41">41th order</option>
+            <option value="51">51th order</option>
+            <option value="61">61th order</option>
+          </select>
         </div>
-
-        <div class="navdrawer-divider"></div>
-        <p class="navdrawer-subheader">CSV Data Options</p>
-        <ul class="navdrawer-nav">
-          <li class="nav-item">
-            <a class="nav-link" href="#" id="btn_download_csv"
-              ><i class="material-icons mr-3">cloud_download</i> Download</a
-            >
-          </li>
-          <li class="nav-item">
-            <input
-              type="file"
-              id="csv_import"
-              class="input_file_csv"
-              accept=".csv"
-            />
-            <a class="nav-link" href="#" id="btn_import_csv_visible"
-              ><i class="material-icons mr-3">cloud_upload</i> Upload</a
-            >
-          </li>
-        </ul>
+      </nav>
+      <div class="navdrawer-divider"></div>
+      <p class="navdrawer-subheader">Line Style</p>
+      <div style="padding-left: 20px; padding-right: 20px;">
+        <label for="inpLineWidth">Line Width</label>
+        <input type="range" class="custom-range" min="1.0" max="6" value="1.5" id="inpLineWidth" step="0.5" />
       </div>
-    </div>
 
-    <div class="container-fluid">
-      <div class="row align-items-start">
-        <div class="col-md-auto col_extra_pad">
-          <div class="card card-table">
-            <div class="card-header d-flex pr-0">
-              <h1 class="card-title mb-0">Samples</h1>
-            </div>
-            <div class="table-responsive">
-              <table id="table_holdtable" class="table table-sm mb-0 table_xsm">
-                <thead>
-                  <tr>
-                    <th scope="col">ID</th>
-                    <th scope="col">
-                      Color
-                    </th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
-            </div>
+      <div class="navdrawer-divider"></div>
+      <p class="navdrawer-subheader">CSV Data Options</p>
+      <ul class="navdrawer-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="#" id="btn_download_csv"><i
+              class="material-icons mr-3">cloud_download</i>
+            Download</a>
+        </li>
+        <li class="nav-item">
+          <input type="file" id="csv_import" class="input_file_csv" accept=".csv" />
+          <a class="nav-link" href="#" id="btn_import_csv_visible"><i class="material-icons mr-3">cloud_upload</i>
+            Upload</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    <div class="row align-items-start">
+      <div class="col-md-auto col_extra_pad">
+        <div class="card card-table">
+          <div class="card-header d-flex pr-0">
+            <h1 class="card-title mb-0">Samples</h1>
+          </div>
+          <div class="table-responsive">
+            <table id="table_holdtable" class="table table-sm mb-0 table_xsm">
+              <thead>
+                <tr>
+                  <th scope="col">ID</th>
+                  <th scope="col">
+                    Color
+                  </th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
           </div>
         </div>
-        <div class="col-xl-auto col_extra_pad">
-          <div class="card card_graph_extra_padd" id="main_section"></div>
+      </div>
+      <div class="col-xl-auto col_extra_pad">
+        <div class="card card_graph_extra_padd" id="main_section"></div>
+      </div>
+    </div>
+  </div>
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalCenterTitle">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="table-responsive" id='table_download_csv'>
+            <table id="table_download_csvtable" class="table table-sm mb-0 table_xsm">
+              <thead>
+                <tr>
+                  <th scope="col">Sample ID</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Download</button>
         </div>
       </div>
     </div>
+  </div>
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+  <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
 
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script
-      type="text/javascript"
-      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-    ></script>
-    <script
-      type="text/javascript"
-      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
-    ></script>
-    <script
-      type="text/javascript"
-      src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"
-    ></script>
+  <!-- Then Material JavaScript on top of Bootstrap JavaScript -->
+  <script type="text/javascript" src="lib/material.min.js"></script>
+</body>
 
-    <!-- Then Material JavaScript on top of Bootstrap JavaScript -->
-    <script type="text/javascript" src="lib/material.min.js"></script>
-  </body>
 </html>
