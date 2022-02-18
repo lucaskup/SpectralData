@@ -8,7 +8,7 @@ d3.select('#btn_download_csv').on('click', () => {
   $('#navdrawerDefault').navdrawer('toggle')
 
   const sampleNames = samples.map(sample => sample.id());
-  tabulate(sampleNames, ['Sample ID'], 'table_download_csv', false, 'table_download_csvchk');
+  tabulate_download_data(sampleNames);
   $('#exampleModalCenter').modal('toggle')
   d3.selectAll('.table_download_csvchk').property('checked', false)
 });
@@ -141,7 +141,7 @@ const fileNameCSVData =
 d3.dsv(';', fileNameCSVData).then(function (data) {
   samples = createSamples(data);
   const sampleNames = samples.map(sample => sample.id());
-  tabulate(sampleNames, ['Sample ID'], 'table_hold');
+  tabulate_sample_data(sampleNames);
   chart = new SpectralChart('#main_section');
   chart.createGraph(samples[0]);
 });
@@ -178,7 +178,7 @@ function asserTableExists(containerID, tableObjectId, cols) {
  * @param {*} data
  * @param {Array<String>} columns indicate the table collumns
  */
-function tabulate(data, columns, containerID, useColorColumn = true, addEventListener = true) {
+function tabulate(data, columns, containerID, useColorColumn, className) {
   const tableObjectId = `${containerID}table`;
 
   let tbody;
@@ -207,7 +207,7 @@ function tabulate(data, columns, containerID, useColorColumn = true, addEventLis
         // return a new object with a value set to the row's column value.
         if (column === 'Sample ID') {
           const idCheck = `${containerID}chk${row}`;
-          return getCheckBoxHTML(idCheck, row, row, addEventListener);
+          return getCheckBoxHTML(idCheck, row, row, className);
         }
         const idElement = column.slice(0, 3) + row;
         return (
@@ -224,7 +224,6 @@ function tabulate(data, columns, containerID, useColorColumn = true, addEventLis
       return cell;
     });
   d3.selectAll('.chk_new_sample').on('change', function addNew() {
-
     const selectedSampleId = d3.select(this).attr('data-id');
     if (this.checked) {
       const sample = samples.find(s => s.id() === selectedSampleId);
@@ -280,6 +279,13 @@ function getLineColors(sampleId) {
 function changeLineColor(lineName, lineColor) {
   d3.selectAll(lineName).style('stroke', lineColor);
 }
+function tabulate_sample_data(sampleNames) {
+  tabulate(sampleNames, ['Sample ID'], 'table_hold', true, 'chk_new_sample')
+}
+
+function tabulate_download_data(sampleNames) {
+  tabulate(sampleNames, ['Sample ID'], 'table_download_csv', false, 'table_download_csvchk');
+}
 
 d3.select('#csv_import').on('change', function readCSVButton() {
   if (this.files.length === 1) {
@@ -291,7 +297,7 @@ d3.select('#csv_import').on('change', function readCSVButton() {
         const newSamples = createSamples(data);
         newSamples.forEach(s => samples.push(s));
         const sampleNames = newSamples.map(sample => sample.id());
-        tabulate(sampleNames, ['Sample ID'], 'table_hold');
+        tabulate_sample_data(sampleNames);
       });
     });
     reader.readAsDataURL(file);
@@ -311,7 +317,7 @@ d3.select('#inpLineWidth').on('input', () => {
 function getLineStrokeWidth() {
   return d3.select('#inpLineWidth').property('value');
 }
-function getCheckBoxHTML(idCheck, label, dataID, classEventListener = 'chk_new_sample') {
+function getCheckBoxHTML(idCheck, label, dataID, classEventListener) {
   return `<div class="custom-control custom-checkbox custom-control-check">
   <input type="checkbox" class="custom-control-input ${classEventListener}" id="${idCheck}" data-id="${dataID}">
   <label class="custom-control-label custom-control-check-label" for="${idCheck}">${label}</label>
