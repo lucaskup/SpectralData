@@ -83,8 +83,7 @@
       <p class="navdrawer-subheader">CSV Data Options</p>
       <ul class="navdrawer-nav">
         <li class="nav-item">
-          <a class="nav-link" href="#" id="btn_download_csv"><i
-              class="material-icons mr-3">cloud_download</i>
+          <a class="nav-link" href="#" id="btn_download_csv"><i class="material-icons mr-3">cloud_download</i>
             Download</a>
         </li>
         <li class="nav-item">
@@ -126,10 +125,10 @@
   <!-- Modal -->
   <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
     aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
       <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalCenterTitle">Modal title</h5>
+        <div class="modal-header ">
+          <h5 class="modal-title" id="exampleModalCenterTitle">Select Sample Data to Download</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -147,8 +146,11 @@
           </div>
         </div>
         <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="btn_download_modal">Download</button>
+          <button type="button" class="btn btn-secondary" id="btn_check_all">Check All</button>
+          <button type="button" class="btn btn-secondary" id="btn_uncheck_all">Uncheck All</button>
+          <button type="button" class="btn btn-secondary" id="btn_toggle">Toggle</button>
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Download</button>
         </div>
       </div>
     </div>

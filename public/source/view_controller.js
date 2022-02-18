@@ -7,8 +7,8 @@ d3.select('#btn_download_csv').on('click', () => {
   $('#navdrawerDefault').navdrawer('toggle')
 
   const sampleNames = samples.map(sample => sample.id());
-  tabulate(sampleNames, ['Sample ID'], 'table_download_csv', false, false);
-  $('#exampleModalCenter').modal('toggle')  
+  tabulate(sampleNames, ['Sample ID'], 'table_download_csv', false, 'table_download_csvchk');
+  $('#exampleModalCenter').modal('toggle')
 
   /*
   if (chart.isDisplayingSomething()) {
@@ -30,6 +30,18 @@ d3.select('#btn_download_csv').on('click', () => {
     );
   }
   */
+});
+
+// plugs events on modal download
+
+d3.select('#btn_check_all').on('click', () => {
+  d3.selectAll('.table_download_csvchk').property('checked', true)
+});
+d3.select('#btn_uncheck_all').on('click', () => {
+  d3.selectAll('.table_download_csvchk').property('checked', false)
+});
+d3.select('#btn_toggle').on('click', () => {
+  d3.selectAll('.table_download_csvchk').property('checked', true)
 });
 
 // Plug events on the check controls of the view
@@ -90,7 +102,7 @@ function getDerivativeOpacity() {
 }
 
 // When the derivative order button is changed, run the updateChart function
-d3.select('#select_approx_order').on('change', function(d) {
+d3.select('#select_approx_order').on('change', function (d) {
   const derivativeOrder = d3.select(this).property('value');
   for (let i = 0; i < samples.length; i++) {
     samples[i].derivativeOrder = derivativeOrder;
@@ -105,7 +117,7 @@ const fileNameCSVData =
     ? 'data/DadosCompleto.csv'
     : 'data/Espectro_Todos.csv';
 // Read csv files and creates the graph
-d3.dsv(';', fileNameCSVData).then(function(data) {
+d3.dsv(';', fileNameCSVData).then(function (data) {
   samples = createSamples(data);
   const sampleNames = samples.map(sample => sample.id());
   tabulate(sampleNames, ['Sample ID'], 'table_hold');
@@ -114,7 +126,7 @@ d3.dsv(';', fileNameCSVData).then(function(data) {
 });
 
 
-function asserTableExists(containerID, tableObjectId, cols){
+function asserTableExists(containerID, tableObjectId, cols) {
   const tableNotCreated = d3.select(`#${tableObjectId}`).empty();
   if (tableNotCreated) {
     const table = d3
@@ -131,13 +143,13 @@ function asserTableExists(containerID, tableObjectId, cols){
       .data(cols)
       .enter()
       .append('th')
-      .text(function(column) {
+      .text(function (column) {
         return column;
       });
     return tbody;
-  } 
+  }
   return d3.select(`#${tableObjectId}`).select('tbody');
-  
+
 }
 
 /**
@@ -145,16 +157,16 @@ function asserTableExists(containerID, tableObjectId, cols){
  * @param {*} data
  * @param {Array<String>} columns indicate the table collumns
  */
-function tabulate(data, columns, containerID, useColorColumn=true, addEventListener=true) {
+function tabulate(data, columns, containerID, useColorColumn = true, addEventListener = true) {
   const tableObjectId = `${containerID}table`;
-  
+
   let tbody;
   const cols = columns;
-  if (useColorColumn){
+  if (useColorColumn) {
     cols.push('Color');
   }
   tbody = asserTableExists(containerID, tableObjectId, cols)
-  
+
   // create a row for each object in the data
   const rows = tbody
     .selectAll('tr')
@@ -167,10 +179,10 @@ function tabulate(data, columns, containerID, useColorColumn=true, addEventListe
   // So the data function accesses it.
   rows
     .selectAll('td')
-    .data(function(row) {
+    .data(function (row) {
       // he does it this way to guarantee you only use the
       // values for the columns you provide.
-      return columns.map(function(column) {
+      return columns.map(function (column) {
         // return a new object with a value set to the row's column value.
         if (column === 'Sample ID') {
           const idCheck = `${containerID}chk${row}`;
@@ -187,11 +199,11 @@ function tabulate(data, columns, containerID, useColorColumn=true, addEventListe
     .enter()
     .append('td')
 
-    .html(function(cell) {
+    .html(function (cell) {
       return cell;
     });
   d3.selectAll('.chk_new_sample').on('change', function addNew() {
-    
+
     const selectedSampleId = d3.select(this).attr('data-id');
     if (this.checked) {
       const sample = samples.find(s => s.id() === selectedSampleId);
@@ -254,7 +266,7 @@ d3.select('#csv_import').on('change', function readCSVButton() {
     const reader = new FileReader();
     reader.addEventListener('load', event => {
       const fileUrl = event.target.result;
-      d3.dsv(';', fileUrl).then(function(data) {
+      d3.dsv(';', fileUrl).then(function (data) {
         const newSamples = createSamples(data);
         newSamples.forEach(s => samples.push(s));
         const sampleNames = newSamples.map(sample => sample.id());
@@ -278,8 +290,7 @@ d3.select('#inpLineWidth').on('input', () => {
 function getLineStrokeWidth() {
   return d3.select('#inpLineWidth').property('value');
 }
-function getCheckBoxHTML(idCheck, label, dataID, addEventListener) {
-  const classEventListener = addEventListener ? 'chk_new_sample' : ' '
+function getCheckBoxHTML(idCheck, label, dataID, classEventListener = 'chk_new_sample') {
   return `<div class="custom-control custom-checkbox custom-control-check">
   <input type="checkbox" class="custom-control-input ${classEventListener}" id="${idCheck}" data-id="${dataID}">
   <label class="custom-control-label custom-control-check-label" for="${idCheck}">${label}</label>
