@@ -53,7 +53,7 @@ spectra using the monotone algorithm proposed by @andrew1979another and
 it allows numeric calculation of derivatives following the method of
 @snrd. One example of such computations is found in Figure \autoref{fig:example} 
 
-![Visualization of two distinct spectral signatures with continuun removal, convex hull and derivative.\label{fig:example}](images\sampleGraph.png)
+![Visualization of two distinct spectral signatures with continuun removal, convex hull and derivative.\label{fig:example}](figure.png)
 
 The idea of the application is to provide fast access for simple
 computations regarding the reflectance spectra without the need of installation 
