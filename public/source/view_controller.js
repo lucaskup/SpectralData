@@ -4,16 +4,49 @@ let samples;
 // Plug events on download csv button
 //data-toggle="modal" data-target="#exampleModalCenter"
 d3.select('#btn_download_csv').on('click', () => {
+
   $('#navdrawerDefault').navdrawer('toggle')
 
   const sampleNames = samples.map(sample => sample.id());
   tabulate(sampleNames, ['Sample ID'], 'table_download_csv', false, 'table_download_csvchk');
   $('#exampleModalCenter').modal('toggle')
+  d3.selectAll('.table_download_csvchk').property('checked', false)
+});
 
-  /*
-  if (chart.isDisplayingSomething()) {
-    const { activeSamples } = chart;
-    const csv = createCSV(activeSamples);
+// plugs events on modal download
+
+d3.select('#btn_check_all').on('click', () => {
+  d3.selectAll('.table_download_csvchk').property('checked', true)
+});
+d3.select('#btn_uncheck_all').on('click', () => {
+  d3.selectAll('.table_download_csvchk').property('checked', false)
+});
+d3.select('#btn_toggle').on('click', () => {
+  d3.selectAll('.table_download_csvchk').each(function (p, j) {
+    selected_check = d3.select(this)
+    new_chk_state = !selected_check.property('checked')
+    selected_check.property('checked', new_chk_state)
+  })
+});
+
+function returnSelectedDownloadSamples() {
+  const samplesToDownload = []
+  d3.selectAll('.table_download_csvchk').each(function (p, j) {
+    isMarked = d3.select(this).property('checked')
+    if (isMarked) {
+      const selectedSampleId = d3.select(this).attr('data-id');
+      const sample = samples.find(s => s.id() === selectedSampleId);
+      samplesToDownload.push(sample)
+    }
+  })
+  return samplesToDownload
+}
+d3.select('#btn_download_modal').on('click', () => {
+
+  selected_samples_download = returnSelectedDownloadSamples()
+  if (selected_samples_download.length > 0) {
+
+    const csv = createCSV(selected_samples_download);
     const csvContent = `data:text/csv;charset=utf-8,${csv}`;
     const encodedUri = encodeURI(csvContent);
 
@@ -26,22 +59,10 @@ d3.select('#btn_download_csv').on('click', () => {
     document.body.removeChild(link); // Required for FF
   } else {
     alert(
-      'Apenas dados exibidos no gráfico serão exportados em csv.\nSelecione amostras e dados.'
+      'Apenas amostras selecionadas são consideradas no CSV.\nSelecione amostras e dados.'
     );
   }
-  */
-});
 
-// plugs events on modal download
-
-d3.select('#btn_check_all').on('click', () => {
-  d3.selectAll('.table_download_csvchk').property('checked', true)
-});
-d3.select('#btn_uncheck_all').on('click', () => {
-  d3.selectAll('.table_download_csvchk').property('checked', false)
-});
-d3.select('#btn_toggle').on('click', () => {
-  d3.selectAll('.table_download_csvchk').property('checked', true)
 });
 
 // Plug events on the check controls of the view
@@ -114,8 +135,8 @@ d3.select('#select_approx_order').on('change', function (d) {
 const urlUsed = window.location.href;
 const fileNameCSVData =
   urlUsed[urlUsed.length - 1] === 'x'
-    ? 'data/DadosCompleto.csv'
-    : 'data/Espectro_Todos.csv';
+    ? 'data/Espectro_Todos.csv'
+    : 'data/sample_data.csv';
 // Read csv files and creates the graph
 d3.dsv(';', fileNameCSVData).then(function (data) {
   samples = createSamples(data);
