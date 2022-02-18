@@ -45,13 +45,13 @@ derivative, convexhull and raw data.
 `VizSpectralData` is a web application designed for rapid and easy to use
 visualization and simple processing of hyperspectral data. It is already
 in use by several researchers and was used in data exploration in many
-scientific publications such as `[@kupssinsku2021; @taina2021]`.
+scientific publications such as [@kupssinsku2021; @taina2021].
 
 In it present form it allows continuum removal by division as presented by
-`@clark1984reflectance`, it estimates the continuum of the reflectance
-spectra using the monotone algorithm proposed by `@andrew1979another` and
+@clark1984reflectance, it estimates the continuum of the reflectance
+spectra using the monotone algorithm proposed by @andrew1979another and
 it allows numeric calculation of derivatives following the method of
-`@snrd`. The idea of the application is to provide fast access for simple
+@snrd. The idea of the application is to provide fast access for simple
 computations regarding the reflectance spectra without the need of proprietary
 (often expensive) systems. 
 
