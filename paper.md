@@ -51,9 +51,13 @@ In it present form it allows continuum removal by division as presented by
 @clark1984reflectance, it estimates the continuum of the reflectance
 spectra using the monotone algorithm proposed by @andrew1979another and
 it allows numeric calculation of derivatives following the method of
-@snrd. The idea of the application is to provide fast access for simple
-computations regarding the reflectance spectra without the need of proprietary
-(often expensive) systems. 
+@snrd. One example of such computations is found in Figure \autoref{fig:example} 
+
+![Visualization of two distinct spectral signatures with continuun removal, convex hull and derivative.\label{fig:example}](images\sampleGraph.png)
+
+The idea of the application is to provide fast access for simple
+computations regarding the reflectance spectra without the need of installation 
+of proprietary (often expensive) systems. 
 
 # Acknowledgements
 
